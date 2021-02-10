@@ -78,6 +78,17 @@
                 android:drawableLeft="@drawable/ic_baseline_stop_40"
                 android:textSize="40sp"/>
 
+            <ToggleButton
+                android:id="@+id/toggle_measure_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:backgroundTint="@color/gray"
+                android:textOff="CONTINUOUS"
+                android:textOn="PERIODIC"
+                android:drawableLeft="@drawable/ic_baseline_timer_40"
+                android:textSize="40sp"/>
+
             <TextView
                 android:id="@+id/text_measure_msg"
                 android:layout_width="match_parent"

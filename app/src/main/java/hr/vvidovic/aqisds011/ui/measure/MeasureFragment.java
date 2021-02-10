@@ -5,13 +5,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+
+import java.util.Date;
 
 import hr.vvidovic.aqisds011.R;
 import hr.vvidovic.aqisds011.Sds011Handler;
@@ -83,6 +87,19 @@ public class MeasureFragment extends Fragment {
                 }
                 else {
                     measureViewModel.postMsg("");
+                }
+            }
+        });
+
+        ToggleButton tbMode = root.findViewById(R.id.toggle_measure_mode);
+        tbMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked) {
+                    sds011Handler.setWorkPeriodMinutes((byte)2);
+                }
+                else {
+                    sds011Handler.setWorkPeriodMinutes((byte) 0);
                 }
             }
         });

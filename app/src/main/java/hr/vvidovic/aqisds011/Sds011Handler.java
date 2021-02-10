@@ -47,9 +47,6 @@ public class Sds011Handler {
 
     private static final byte PERIOD_CONTINUOUS = 0;
 
-
-    private ExecutorService measureService = Executors.newFixedThreadPool(1);
-
     private UsbManager usbManager;
     private UsbSerialDevice serial;
 
@@ -58,6 +55,7 @@ public class Sds011Handler {
     // 0：continuous(default) - report each second
     // 1-30minute：【work  30  seconds and sleep n*60-30 seconds】- report after 30 seconds working
     private byte workPeriodMinutes = 0;
+    private byte workPeriodReportedMinutes = 0;
 
     public Sds011Handler(Activity activity, MeasureViewModel measureViewModel) {
         this.measureViewModel = measureViewModel;
@@ -143,7 +141,7 @@ public class Sds011Handler {
 //            measureViewModel.postMsg(Arrays.toString(b));
             if (b.length == 10) {
                 if(b[1] == (byte)0xc0) {
-                    measureViewModel.postMsg("Measuring...");
+                    measureViewModel.postMsg("Measuring, wp: " + workPeriodReportedMinutes);
                     float pm25 = (256 * Math.abs(b[3]) + Math.abs(b[2])) / 10.0f;
                     float pm10 = (256 * Math.abs(b[5]) + Math.abs(b[4])) / 10.0f;
 
@@ -157,6 +155,7 @@ public class Sds011Handler {
                             break;
                         case 1:
                             measureViewModel.postMsg("Awake...");
+                            serial.write(constructCommand(CMD_WORKING_PERIOD, (byte)1, workPeriodMinutes));
                             break;
                         default:
                             measureViewModel.postMsg("err,b[4]!=(0,1): " + Arrays.toString(b));
@@ -164,9 +163,10 @@ public class Sds011Handler {
                 }
                 // Set working period response
                 else if(b[1] == (byte)0xc5 && b[2] == (byte)8) {
-                    measureViewModel.postMsg("working period: " + (int)b[4]);
+                    workPeriodReportedMinutes = b[4];
+                    measureViewModel.postMsg("working period: " + (int)workPeriodReportedMinutes);
                 }
-                // Set data reportin mode response
+                // Set data reporting mode response
                 else if(b[1] == (byte)0xc5 && b[2] == (byte)2) {
                     measureViewModel.postMsg("reporting mode: " + (int)b[4]);
                 }
@@ -246,5 +246,10 @@ public class Sds011Handler {
 
         return command;
 
+    }
+
+    public void setWorkPeriodMinutes(byte workPeriodMinutes) {
+        this.workPeriodMinutes = workPeriodMinutes;
+//        serial.write(constructCommand(CMD_WORKING_PERIOD, (byte)1, workPeriodMinutes));
     }
 }
