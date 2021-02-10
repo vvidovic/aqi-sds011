@@ -15,31 +15,26 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import java.util.Date;
-
 import hr.vvidovic.aqisds011.R;
-import hr.vvidovic.aqisds011.Sds011Handler;
+import hr.vvidovic.aqisds011.Sds011ViewModel;
 
 public class MeasureFragment extends Fragment {
 
-    private MeasureViewModel measureViewModel;
-    private Sds011Handler sds011Handler;
+    private Sds011ViewModel model;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        sds011Handler = new Sds011Handler(getActivity(), measureViewModel);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        measureViewModel =
-                new ViewModelProvider(this).get(MeasureViewModel.class);
+        model = new ViewModelProvider(requireActivity()).get(Sds011ViewModel.class);
         View root = inflater.inflate(R.layout.fragment_measure, container, false);
 
         final TextView textViewPm25 = root.findViewById(R.id.text_measure_pm25);
-        measureViewModel.getValuePm25().observe(getViewLifecycleOwner(), new Observer<String>() {
+        model.getValuePm25().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textViewPm25.setText(s);
@@ -47,7 +42,7 @@ public class MeasureFragment extends Fragment {
         });
 
         final TextView textViewPm10 = root.findViewById(R.id.text_measure_pm10);
-        measureViewModel.getValuePm10().observe(getViewLifecycleOwner(), new Observer<String>() {
+        model.getValuePm10().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textViewPm10.setText(s);
@@ -55,7 +50,7 @@ public class MeasureFragment extends Fragment {
         });
 
         final TextView textViewMsg = root.findViewById(R.id.text_measure_msg);
-        measureViewModel.getValueMsg().observe(getViewLifecycleOwner(), new Observer<String>() {
+        model.getValueMsg().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textViewMsg.setText(s);
@@ -66,13 +61,8 @@ public class MeasureFragment extends Fragment {
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                measureViewModel.postMsg("Starting...");
-                    if(sds011Handler.start()) {
-                        measureViewModel.postMsg("Started");
-                    }
-                    else {
-                        measureViewModel.postMsg("");
-                    }
+                model.postMsg("Starting...");
+                model.postSensorStarted(true);
             }
         });
 
@@ -80,27 +70,17 @@ public class MeasureFragment extends Fragment {
         btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                measureViewModel.postMsg("Stopping...");
-                boolean stopped = sds011Handler.stop();
-                if(stopped) {
-                    measureViewModel.postMsg("Stopped");
-                }
-                else {
-                    measureViewModel.postMsg("");
-                }
+                model.postMsg("Stopping...");
+                model.postSensorStarted(false);
             }
         });
 
         ToggleButton tbMode = root.findViewById(R.id.toggle_measure_mode);
+        tbMode.setChecked(model.isWorkPeriodic());
         tbMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) {
-                    sds011Handler.setWorkPeriodMinutes((byte)2);
-                }
-                else {
-                    sds011Handler.setWorkPeriodMinutes((byte) 0);
-                }
+                model.postWorkPeriodic(isChecked);
             }
         });
 

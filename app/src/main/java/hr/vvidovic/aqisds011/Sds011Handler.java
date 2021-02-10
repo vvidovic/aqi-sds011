@@ -18,10 +18,6 @@ import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
 
 import java.util.Arrays;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import hr.vvidovic.aqisds011.ui.measure.MeasureViewModel;
 
 public class Sds011Handler {
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
@@ -50,15 +46,15 @@ public class Sds011Handler {
     private UsbManager usbManager;
     private UsbSerialDevice serial;
 
-    private MeasureViewModel measureViewModel;
+    private Sds011ViewModel model;
 
     // 0：continuous(default) - report each second
     // 1-30minute：【work  30  seconds and sleep n*60-30 seconds】- report after 30 seconds working
     private byte workPeriodMinutes = 0;
     private byte workPeriodReportedMinutes = 0;
 
-    public Sds011Handler(Activity activity, MeasureViewModel measureViewModel) {
-        this.measureViewModel = measureViewModel;
+    public Sds011Handler(Activity activity, Sds011ViewModel model) {
+        this.model = model;
         initUsb(activity);
     }
 
@@ -141,34 +137,34 @@ public class Sds011Handler {
 //            measureViewModel.postMsg(Arrays.toString(b));
             if (b.length == 10) {
                 if(b[1] == (byte)0xc0) {
-                    measureViewModel.postMsg("Measuring, wp: " + workPeriodReportedMinutes);
+                    model.postMsg("Measuring, wp: " + workPeriodReportedMinutes);
                     float pm25 = (256 * Math.abs(b[3]) + Math.abs(b[2])) / 10.0f;
                     float pm10 = (256 * Math.abs(b[5]) + Math.abs(b[4])) / 10.0f;
 
-                    measureViewModel.postValues(pm25, pm10);
+                    model.postValues(pm25, pm10);
                 }
                 // Sleep response
                 else if(b[1] == (byte)0xc5 && b[2] == (byte)6) {
                     switch(b[4]) {
                         case 0:
-                            measureViewModel.postMsg("Sleeping...");
+                            model.postMsg("Sleeping...");
                             break;
                         case 1:
-                            measureViewModel.postMsg("Awake...");
+                            model.postMsg("Awake...");
                             serial.write(constructCommand(CMD_WORKING_PERIOD, (byte)1, workPeriodMinutes));
                             break;
                         default:
-                            measureViewModel.postMsg("err,b[4]!=(0,1): " + Arrays.toString(b));
+                            model.postMsg("err,b[4]!=(0,1): " + Arrays.toString(b));
                     }
                 }
                 // Set working period response
                 else if(b[1] == (byte)0xc5 && b[2] == (byte)8) {
                     workPeriodReportedMinutes = b[4];
-                    measureViewModel.postMsg("working period: " + (int)workPeriodReportedMinutes);
+                    model.postMsg("working period: " + (int)workPeriodReportedMinutes);
                 }
                 // Set data reporting mode response
                 else if(b[1] == (byte)0xc5 && b[2] == (byte)2) {
-                    measureViewModel.postMsg("reporting mode: " + (int)b[4]);
+                    model.postMsg("reporting mode: " + (int)b[4]);
                 }
             }
         }
