@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -13,11 +14,20 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import hr.vvidovic.aqisds011.R;
+import hr.vvidovic.aqisds011.Sds011Handler;
 
 public class MeasureFragment extends Fragment {
 
     private MeasureViewModel measureViewModel;
+    private Sds011Handler sds011Handler;
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        sds011Handler = new Sds011Handler(getActivity(), measureViewModel);
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         measureViewModel =
@@ -39,6 +49,44 @@ public class MeasureFragment extends Fragment {
                 textViewPm10.setText(s);
             }
         });
+
+        final TextView textViewMsg = root.findViewById(R.id.text_measure_msg);
+        measureViewModel.getValueMsg().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String s) {
+                textViewMsg.setText(s);
+            }
+        });
+
+        Button btnStart = root.findViewById(R.id.button_measure_start);
+        btnStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                measureViewModel.postMsg("Starting...");
+                    if(sds011Handler.start()) {
+                        measureViewModel.postMsg("Started");
+                    }
+                    else {
+                        measureViewModel.postMsg("");
+                    }
+            }
+        });
+
+        Button btnStop = root.findViewById(R.id.button_measure_stop);
+        btnStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                measureViewModel.postMsg("Stopping...");
+                boolean stopped = sds011Handler.stop();
+                if(stopped) {
+                    measureViewModel.postMsg("Stopped");
+                }
+                else {
+                    measureViewModel.postMsg("");
+                }
+            }
+        });
+
         return root;
     }
 }
