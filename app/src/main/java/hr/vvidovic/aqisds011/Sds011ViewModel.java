@@ -4,25 +4,38 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import hr.vvidovic.aqisds011.Sds011Handler;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import hr.vvidovic.aqisds011.data.Measurement;
 
 public class Sds011ViewModel extends ViewModel {
+    public static final byte DEFAULT_WP_MINUTES = (byte)2;
+    public static final boolean DEFAULT_WP = false;
+
     private Sds011Handler sds011Handler;
 
     private final MutableLiveData<Boolean> workPeriodic = new MutableLiveData<>();
-    private final MutableLiveData<Byte> workPeriodicMinutes = new MutableLiveData<>();
+    private final MutableLiveData<Byte> workPeriodMinutes = new MutableLiveData<>();
 
     private final MutableLiveData<Boolean> sensorStarted = new MutableLiveData<>();
 
-    private final MutableLiveData<String> valuePm25 = new MutableLiveData<>();
-    private final MutableLiveData<String> valuePm10 = new MutableLiveData<>();
+    private final MutableLiveData<Measurement> valueMeasurement = new MutableLiveData<>();
     private final MutableLiveData<String> valueMsg = new MutableLiveData<>();
+    private final MutableLiveData<String> valueStatus = new MutableLiveData<>();
+
+    private final MutableLiveData<List<Measurement>> history = new MutableLiveData<>();
 
     public Sds011ViewModel() {
-        valuePm25.setValue("PM2.5: --");
-        valuePm10.setValue("PM10: --");
-        workPeriodic.setValue(Boolean.FALSE);
-        workPeriodicMinutes.setValue((byte)0);
+        valueMeasurement.setValue(new Measurement());
+        sensorStarted.setValue(Boolean.FALSE);
+//        workPeriodic.setValue(Boolean.FALSE);
+//        workPeriodicMinutes.setValue((byte)2);
+        valueStatus.setValue("Stopped.");
+
+        List<Measurement> h = new ArrayList<>();
+        history.setValue(h);
     }
 
     public void setSds011Handler(Sds011Handler sds011Handler) {
@@ -33,63 +46,100 @@ public class Sds011ViewModel extends ViewModel {
         return sds011Handler;
     }
 
-    public void postValues(float pm25, float pm10) {
-        postValuePm25(String.format("%01.2f", pm25));
-        postValuePm10(String.format("%01.2f", pm10));
+    public void postMeasurement(Measurement m) {
+        postValueMeasurement(m);
+
+        List<Measurement> newHist = history.getValue();
+
+        newHist.add(m);
+        history.postValue(newHist);
     }
 
     public void postMsg(String msg) {
         valueMsg.postValue(msg);
     }
 
-    public LiveData<String> getValuePm25() {
-        return valuePm25;
-    }
-    private void postValuePm25(String value) {
-        valuePm25.postValue("PM2.5: " + value);
+    public void postStatus(String status) {
+        valueStatus.postValue(status);
     }
 
-    public LiveData<String> getValuePm10() {
-        return valuePm10;
+    public LiveData<Measurement> getValueMeasurement() {
+        return valueMeasurement;
     }
-    private void postValuePm10(String value) {
-        valuePm10.postValue("PM10: " + value);
+    private void postValueMeasurement(Measurement value) {
+        valueMeasurement.postValue(value);
     }
+
 
     public LiveData<String> getValueMsg() {
         return valueMsg;
     }
 
+    public LiveData<String> getValueStatus() { return valueStatus; }
+
     public void postWorkPeriodic(Boolean workPeriodic) {
         this.workPeriodic.postValue(workPeriodic);
         if(workPeriodic) {
-            workPeriodicMinutes.setValue((byte)2);
+            sds011Handler.setWorkPeriodMinutes(workPeriodMinutes.getValue());
         }
         else {
-            workPeriodicMinutes.setValue((byte)0);
+            sds011Handler.setWorkPeriodMinutes((byte)0);
         }
-        sds011Handler.setWorkPeriodMinutes(workPeriodicMinutes.getValue());
     }
     public boolean isWorkPeriodic() {
         return workPeriodic.getValue();
     }
+    public void setWorkPeriodic(boolean periodic) {
+        workPeriodic.setValue(periodic);
+    }
+    public Byte getWorkPeriodMinutes() {
+        return workPeriodMinutes.getValue();
+    }
+    public void setWorkPeriodMinutes(Byte minutes) {
+        workPeriodMinutes.setValue(minutes);
+    }
+
     public void postSensorStarted(Boolean sensorStarted) {
         this.sensorStarted.postValue(sensorStarted);
         if(sensorStarted) {
             if(sds011Handler.start()) {
                 postMsg("Started");
+                if(isWorkPeriodic()) {
+                    postStatus("Running in the PERIODIC mode.");
+                }
+                else {
+                    postStatus("Running in the CONTINUOUS mode.");
+                }
             }
             else {
                 postMsg("");
+                postStatus("Sensor is not connected.");
             }
         }
         else {
             if(sds011Handler.stop()) {
                 postMsg("Stopped");
+                postStatus("");
             }
             else {
                 postMsg("");
+                postStatus("Sensor is not connected.");
             }
         }
+    }
+    public boolean isSensorStarted() {
+        return sensorStarted.getValue();
+    }
+
+    public void addToHistory(Measurement measurement) {
+        List<Measurement> newHistory = history.getValue();
+        newHistory.add(measurement);
+        history.postValue(newHistory);
+    }
+    public void setHistory(List<Measurement> history) {
+        this.history.postValue(history);
+    }
+    public List<Measurement> getHistory() {
+        return history.getValue();
     }
 }

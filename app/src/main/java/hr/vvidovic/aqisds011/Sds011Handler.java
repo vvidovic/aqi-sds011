@@ -17,7 +17,11 @@ import androidx.annotation.RequiresApi;
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
+
+import hr.vvidovic.aqisds011.data.AppDatabase;
+import hr.vvidovic.aqisds011.data.Measurement;
 
 public class Sds011Handler {
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
@@ -46,6 +50,7 @@ public class Sds011Handler {
     private UsbManager usbManager;
     private UsbSerialDevice serial;
 
+    private AppDatabase db;
     private Sds011ViewModel model;
 
     // 0：continuous(default) - report each second
@@ -53,8 +58,9 @@ public class Sds011Handler {
     private byte workPeriodMinutes = 0;
     private byte workPeriodReportedMinutes = 0;
 
-    public Sds011Handler(Activity activity, Sds011ViewModel model) {
+    public Sds011Handler(Activity activity, Sds011ViewModel model, AppDatabase db) {
         this.model = model;
+        this.db = db;
         initUsb(activity);
     }
 
@@ -121,7 +127,6 @@ public class Sds011Handler {
                         }
                     }
                     else {
-                        // Bummer
                         Log.d(Sds011Handler.class.getSimpleName(), "permission denied for device " + device);
                     }
                 }
@@ -137,11 +142,14 @@ public class Sds011Handler {
 //            measureViewModel.postMsg(Arrays.toString(b));
             if (b.length == 10) {
                 if(b[1] == (byte)0xc0) {
-                    model.postMsg("Measuring, wp: " + workPeriodReportedMinutes);
+                    model.postMsg("Measuring, wp: " + workPeriodReportedMinutes + " - " + LocalDateTime.now().toString());
                     float pm25 = (256 * Math.abs(b[3]) + Math.abs(b[2])) / 10.0f;
                     float pm10 = (256 * Math.abs(b[5]) + Math.abs(b[4])) / 10.0f;
 
-                    model.postValues(pm25, pm10);
+                    Measurement m = new Measurement(pm25, pm10);
+                    db.measurementDao().insertAll(m);
+
+                    model.postMeasurement(m);
                 }
                 // Sleep response
                 else if(b[1] == (byte)0xc5 && b[2] == (byte)6) {

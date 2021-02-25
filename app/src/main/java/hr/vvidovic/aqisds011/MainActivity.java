@@ -1,5 +1,7 @@
 package hr.vvidovic.aqisds011;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,13 +10,20 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.room.Room;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.List;
+
+import hr.vvidovic.aqisds011.data.AppDatabase;
+import hr.vvidovic.aqisds011.data.Measurement;
+
 public class MainActivity extends AppCompatActivity {
 
-    private Sds011ViewModel sds011ViewModel;
+    private Sds011ViewModel model;
 
+    private AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,9 +39,53 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
 
-        sds011ViewModel = new ViewModelProvider(this).get(Sds011ViewModel.class);
-        Sds011Handler sds011Handler = new Sds011Handler(this, sds011ViewModel);
-        sds011ViewModel.setSds011Handler(sds011Handler);
+        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "aqi-sds011")
+                .allowMainThreadQueries().build();
+
+        model = new ViewModelProvider(this).get(Sds011ViewModel.class);
+        List<Measurement> history = db.measurementDao().getAll();
+        model.setHistory(history);
+        Sds011Handler sds011Handler = new Sds011Handler(this, model, db);
+        model.setSds011Handler(sds011Handler);
+
+        // Read / init settings.
+        SharedPreferences prefs = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        if(!prefs.contains(getString(R.string.settings_work_period_key))) {
+            editor.putInt(
+                    getString(R.string.settings_work_period_key), Sds011ViewModel.DEFAULT_WP_MINUTES);
+            editor.apply();
+            model.setWorkPeriodMinutes(Sds011ViewModel.DEFAULT_WP_MINUTES);
+        }
+        else {
+            model.setWorkPeriodMinutes(
+                    (byte)prefs.getInt(getString(R.string.settings_work_period_key),
+                            Sds011ViewModel.DEFAULT_WP_MINUTES));
+        }
+
+        if(!prefs.contains(getString(R.string.settings_work_periodic_key))) {
+            editor.putBoolean(
+                    getString(R.string.settings_work_periodic_key), Sds011ViewModel.DEFAULT_WP);
+            editor.apply();
+            model.setWorkPeriodic(Sds011ViewModel.DEFAULT_WP);
+        }
+        else {
+            model.setWorkPeriodic(
+                    prefs.getBoolean(getString(R.string.settings_work_periodic_key),
+                            Sds011ViewModel.DEFAULT_WP));
+        }
+
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        SharedPreferences prefs = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(
+                getString(R.string.settings_work_periodic_key), model.isWorkPeriodic());
+        editor.apply();
+    }
 }
