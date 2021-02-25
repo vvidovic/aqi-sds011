@@ -1,5 +1,6 @@
 package hr.vvidovic.aqisds011.ui.measure;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,8 +52,13 @@ public class MeasureFragment extends Fragment {
             public void onChanged(@Nullable Measurement m) {
                 textViewPm25.setText(String.format("%01.2f", m.pm25));
                 textViewPm25Aqi.setText(String.format("%d", m.aqiPm25()));
+                textViewPm25.setBackgroundColor(m.aqiPm25Category().color);
+                textViewPm25Aqi.setBackgroundColor(m.aqiPm25Category().color);
+
                 textViewPm10.setText(String.format("%01.2f", m.pm10));
                 textViewPm10Aqi.setText(String.format("%d", m.aqiPm10()));
+                textViewPm10.setBackgroundColor(m.aqiPm10Category().color);
+                textViewPm10Aqi.setBackgroundColor(m.aqiPm10Category().color);
             }
         });
 

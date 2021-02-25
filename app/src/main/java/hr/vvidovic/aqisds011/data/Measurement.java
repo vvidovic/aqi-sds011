@@ -1,12 +1,12 @@
 package hr.vvidovic.aqisds011.data;
 
+import android.graphics.Color;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 /*
 AQI calculation & coloring adapted from:
@@ -36,26 +36,36 @@ public class Measurement {
         return calcAQIpm25(pm25);
     }
 
+    public Category aqiPm25Category() {
+        return Category.fromAqi(calcAQIpm25(pm25));
+    }
+
+    public Category aqiPm10Category() {
+        return Category.fromAqi(calcAQIpm10(pm10));
+    }
+
     public int aqiPm10() {
         return calcAQIpm10(pm10);
     }
 
-    enum Color {
-        brown(300),
-        purple(200),
-        red(150),
-        orange(100),
-        yellow(50),
-        green(0);
+    public enum Category {
+        brown(300, "#592F2a"),
+        purple(200,"#89609E"),
+        red(150,"#870202"),
+        orange(100,"#E85C1C"),
+        yellow(50,"#F3D111"),
+        green(0,"#749B4F");
 
         private final int aqiAtLeast;
+        public final int color;
 
-        Color(int aqiAtLeast) {
+        Category(int aqiAtLeast, String color) {
             this.aqiAtLeast = aqiAtLeast;
+            this.color = Color.parseColor(color);
         }
 
-        public static Color fromAqi(int aqi) {
-            for (Color c: Color.values()) {
+        public static Category fromAqi(int aqi) {
+            for (Category c: Category.values()) {
                 if(aqi >= c.aqiAtLeast) {
                     return c;
                 }

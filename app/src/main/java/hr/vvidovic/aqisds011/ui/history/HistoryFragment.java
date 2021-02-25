@@ -71,24 +71,31 @@ public class HistoryFragment extends Fragment {
         return root;
     }
 
-    private TableRow createRowHeader(View root, String dateTime, String pm25aqi, String pm25, String pm10aqi, String pm10) {
+    private TableRow createRowHeader(View root,
+                                     String dateTime,
+                                     String pm25aqi, String pm25,
+                                     String pm10aqi, String pm10) {
         TableRow tr = new TableRow(root.getContext());
-        tr.addView(createCell(root, dateTime, Gravity.CENTER));
-        tr.addView(createCell(root, pm25aqi, Gravity.CENTER));
-        tr.addView(createCell(root, pm25, Gravity.CENTER));
-        tr.addView(createCell(root, pm10aqi, Gravity.CENTER));
-        tr.addView(createCell(root, pm10, Gravity.CENTER));
+        tr.addView(createCell(root, dateTime, 0, Gravity.CENTER));
+        tr.addView(createCell(root, pm25aqi, 0, Gravity.CENTER));
+        tr.addView(createCell(root, pm25, 0, Gravity.CENTER));
+        tr.addView(createCell(root, pm10aqi, 0, Gravity.CENTER));
+        tr.addView(createCell(root, pm10, 0, Gravity.CENTER));
 
         return tr;
     }
 
-    private TableRow createRow(View root, String dateTime, String pm25aqi, String pm25, String pm10aqi, String pm10, int gravity) {
+    private TableRow createRow(View root,
+                               String dateTime,
+                               String pm25aqi, String pm25, Measurement.Category pm25Category,
+                               String pm10aqi, String pm10, Measurement.Category pm10Category,
+                               int gravity) {
         TableRow tr = new TableRow(root.getContext());
-        tr.addView(createCell(root, dateTime, gravity));
-        tr.addView(createCell(root, pm25aqi, gravity));
-        tr.addView(createCell(root, pm25, gravity));
-        tr.addView(createCell(root, pm10aqi, gravity));
-        tr.addView(createCell(root, pm10, gravity));
+        tr.addView(createCell(root, dateTime,0, gravity));
+        tr.addView(createCell(root, pm25aqi, pm25Category.color, gravity));
+        tr.addView(createCell(root, pm25, pm25Category.color, gravity));
+        tr.addView(createCell(root, pm10aqi, pm10Category.color, gravity));
+        tr.addView(createCell(root, pm10, pm10Category.color, gravity));
 
         return tr;
     }
@@ -98,16 +105,19 @@ public class HistoryFragment extends Fragment {
                 Instant.ofEpochMilli(m.dateTime).toString(),
                 String.format("%d", m.aqiPm25()),
                 String.format("%01.2f", m.pm25),
+                m.aqiPm25Category(),
                 String.format("%d", m.aqiPm10()),
                 String.format("%01.2f", m.pm10),
+                m.aqiPm10Category(),
                 Gravity.RIGHT);
     }
 
-    private TextView createCell(View root, Object val, int gravity) {
+    private TextView createCell(View root, Object val, int color, int gravity) {
         TextView tv = new TextView(root.getContext());
         tv.setPadding(10, 10, 10, 10);
         tv.setText(val.toString());
         tv.setGravity(gravity);
+        tv.setBackgroundColor(color);
         return tv;
     }
 }
