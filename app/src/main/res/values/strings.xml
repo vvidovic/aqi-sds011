@@ -13,4 +13,5 @@
 
     <string name="settings_work_period_key">work_period</string>
     <string name="settings_work_periodic_key">work_periodic</string>
+    <string name="settings_work_continuous_avg_cnt">work_cont_avg_cnt</string>
 </resources>

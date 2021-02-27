@@ -31,27 +31,53 @@ public class SettingsFragment extends Fragment {
         final EditText editWorkPeriod = root.findViewById(R.id.edit_settings_work_period_minutes);
         editWorkPeriod.setText(model.getWorkPeriodMinutes().toString());
 
+        final EditText editWorkContAvgCnt = root.findViewById(R.id.edit_settings_work_continuous_avg_cnt);
+        editWorkContAvgCnt.setText(model.getWorkContinuousAverageCount().toString());
+
         final Button buttonSave = root.findViewById(R.id.button_settings_save);
         buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Editable minutesStr = editWorkPeriod.getText();
-                Byte minutestByte = Byte.valueOf(minutesStr.toString());
-                model.setWorkPeriodMinutes(minutestByte);
+                Editable avgCountStr = editWorkContAvgCnt.getText();
+                try {
+                    Byte minutestByte = Byte.valueOf(minutesStr.toString());
+                    if(minutestByte < 0 || minutestByte > 30) {
+                        throw new NumberFormatException("0 <= minutes <= 30.");
+                    }
 
-                SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putInt(getString(R.string.settings_work_period_key), minutestByte);
-                editor.commit();
+                    Integer avgCount = Integer.valueOf(avgCountStr.toString());
+                    if(avgCount < 1) {
+                        throw new NumberFormatException("1 <= number of averaging measurements.");
+                    }
 
-                new AlertDialog.Builder(getContext())
-                    .setTitle("Saved")
-                    .setMessage("Settings saved.")
-                    .setIcon(R.drawable.ic_baseline_info_24)
-                    .setPositiveButton("OK", null)
-                    .show();
+                    model.setWorkPeriodMinutes(minutestByte);
+                    model.setWorkContinuousAverageCount(avgCount);
+
+                    SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putInt(getString(R.string.settings_work_period_key), minutestByte);
+                    editor.putInt(getString(R.string.settings_work_continuous_avg_cnt), avgCount);
+                    editor.commit();
+
+                    new AlertDialog.Builder(getContext())
+                            .setTitle("Saved")
+                            .setMessage("Settings saved.")
+                            .setIcon(R.drawable.ic_baseline_info_24)
+                            .setPositiveButton("OK", null)
+                            .show();
+                }
+                catch (NumberFormatException e) {
+                    new AlertDialog.Builder(getContext())
+                            .setTitle("Error")
+                            .setMessage("Error saving: " + e.getLocalizedMessage())
+                            .setIcon(R.drawable.ic_baseline_error_24)
+                            .setPositiveButton("OK", null)
+                            .show();
+                }
             }
         });
+
         return root;
     }
 }

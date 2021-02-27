@@ -13,11 +13,13 @@ import hr.vvidovic.aqisds011.data.Measurement;
 public class Sds011ViewModel extends ViewModel {
     public static final byte DEFAULT_WP_MINUTES = (byte)2;
     public static final boolean DEFAULT_WP = false;
+    public static final int DEFAULT_WC_CNT = 30;
 
     private Sds011Handler sds011Handler;
 
     private final MutableLiveData<Boolean> workPeriodic = new MutableLiveData<>();
     private final MutableLiveData<Byte> workPeriodMinutes = new MutableLiveData<>();
+    private final MutableLiveData<Integer> workContinuousAverageCount = new MutableLiveData<>();
 
     private final MutableLiveData<Boolean> sensorStarted = new MutableLiveData<>();
 
@@ -27,11 +29,12 @@ public class Sds011ViewModel extends ViewModel {
 
     private final MutableLiveData<List<Measurement>> history = new MutableLiveData<>();
 
+    private final List<Measurement> continuousMeasurementAvgHist = new ArrayList<>();
+
+
     public Sds011ViewModel() {
         valueMeasurement.setValue(new Measurement());
         sensorStarted.setValue(Boolean.FALSE);
-//        workPeriodic.setValue(Boolean.FALSE);
-//        workPeriodicMinutes.setValue((byte)2);
         valueStatus.setValue("Stopped.");
 
         List<Measurement> h = new ArrayList<>();
@@ -49,10 +52,33 @@ public class Sds011ViewModel extends ViewModel {
     public void postMeasurement(Measurement m) {
         postValueMeasurement(m);
 
-        List<Measurement> newHist = history.getValue();
+        Measurement newM = null;
+        if(!isWorkPeriodic()) {
+            continuousMeasurementAvgHist.add(m);
+            int cCount = continuousMeasurementAvgHist.size();
+            if(cCount >= getWorkContinuousAverageCount()) {
+                double pm25sum = 0.0;
+                double pm10sum = 0.0;
+                for (Measurement cm: continuousMeasurementAvgHist) {
+                    pm25sum += cm.pm25;
+                    pm10sum += cm.pm10;
+                }
 
-        newHist.add(m);
-        history.postValue(newHist);
+                newM = new Measurement((float)pm25sum/cCount, (float)pm10sum/cCount);
+                newM.dateTime = m.dateTime;
+                continuousMeasurementAvgHist.clear();
+            }
+        }
+        else {
+            newM = m;
+        }
+
+        if(newM != null) {
+            List<Measurement> newHist = history.getValue();
+
+            newHist.add(newM);
+            history.postValue(newHist);
+        }
     }
 
     public void postMsg(String msg) {
@@ -79,6 +105,9 @@ public class Sds011ViewModel extends ViewModel {
 
     public void postWorkPeriodic(Boolean workPeriodic) {
         this.workPeriodic.postValue(workPeriodic);
+        configureSensorWorkPeriodic(workPeriodic);
+    }
+    private void configureSensorWorkPeriodic(boolean workPeriodic) {
         if(workPeriodic) {
             sds011Handler.setWorkPeriodMinutes(workPeriodMinutes.getValue());
         }
@@ -99,8 +128,17 @@ public class Sds011ViewModel extends ViewModel {
         workPeriodMinutes.setValue(minutes);
     }
 
+    public Integer getWorkContinuousAverageCount() {
+        return workContinuousAverageCount.getValue();
+    }
+    public void setWorkContinuousAverageCount(Integer count) {
+        workContinuousAverageCount.setValue(count);
+    }
+
     public void postSensorStarted(Boolean sensorStarted) {
         this.sensorStarted.postValue(sensorStarted);
+        // Update sensor handler workPeriodic value.
+        configureSensorWorkPeriodic(workPeriodic.getValue());
         if(sensorStarted) {
             if(sds011Handler.start()) {
                 postMsg("Started");

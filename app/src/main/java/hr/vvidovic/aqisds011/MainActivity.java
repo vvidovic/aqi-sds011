@@ -52,6 +52,18 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = this.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
+        if(!prefs.contains(getString(R.string.settings_work_periodic_key))) {
+            editor.putBoolean(
+                    getString(R.string.settings_work_periodic_key), Sds011ViewModel.DEFAULT_WP);
+            editor.apply();
+            model.setWorkPeriodic(Sds011ViewModel.DEFAULT_WP);
+        }
+        else {
+            model.setWorkPeriodic(
+                    prefs.getBoolean(getString(R.string.settings_work_periodic_key),
+                            Sds011ViewModel.DEFAULT_WP));
+        }
+
         if(!prefs.contains(getString(R.string.settings_work_period_key))) {
             editor.putInt(
                     getString(R.string.settings_work_period_key), Sds011ViewModel.DEFAULT_WP_MINUTES);
@@ -64,16 +76,16 @@ public class MainActivity extends AppCompatActivity {
                             Sds011ViewModel.DEFAULT_WP_MINUTES));
         }
 
-        if(!prefs.contains(getString(R.string.settings_work_periodic_key))) {
-            editor.putBoolean(
-                    getString(R.string.settings_work_periodic_key), Sds011ViewModel.DEFAULT_WP);
+        if(!prefs.contains(getString(R.string.settings_work_continuous_avg_cnt))) {
+            editor.putInt(
+                    getString(R.string.settings_work_continuous_avg_cnt), Sds011ViewModel.DEFAULT_WC_CNT);
             editor.apply();
-            model.setWorkPeriodic(Sds011ViewModel.DEFAULT_WP);
+            model.setWorkContinuousAverageCount(Sds011ViewModel.DEFAULT_WC_CNT);
         }
         else {
-            model.setWorkPeriodic(
-                    prefs.getBoolean(getString(R.string.settings_work_periodic_key),
-                            Sds011ViewModel.DEFAULT_WP));
+            model.setWorkContinuousAverageCount(
+                    prefs.getInt(getString(R.string.settings_work_continuous_avg_cnt),
+                            Sds011ViewModel.DEFAULT_WC_CNT));
         }
 
     }

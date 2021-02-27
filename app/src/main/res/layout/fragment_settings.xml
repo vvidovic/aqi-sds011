@@ -20,7 +20,7 @@
             android:layout_marginEnd="8dp"
             android:textAlignment="center"
             android:textSize="20sp"
-            android:text="Work period (minutes):"
+            android:text="Periodic measurements\nWork period (minutes):"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             />
@@ -40,6 +40,35 @@
             app:layout_constraintTop_toBottomOf="@id/text_settings_work_period_minutes_lbl"
             />
 
+        <TextView
+            android:id="@+id/text_settings_work_continuous_avg_cnt_lbl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:text="Continuous measurement\nAverage for history\n(measurements number):"
+            app:layout_constraintLeft_toLeftOf="@id/edit_settings_work_period_minutes"
+            app:layout_constraintTop_toBottomOf="@id/edit_settings_work_period_minutes"
+            />
+
+        <EditText
+            android:id="@+id/edit_settings_work_continuous_avg_cnt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:textAlignment="center"
+            android:textSize="40sp"
+            android:text="--"
+            android:inputType="number"
+            app:layout_constraintLeft_toLeftOf="@id/text_settings_work_continuous_avg_cnt_lbl"
+            app:layout_constraintTop_toBottomOf="@id/text_settings_work_continuous_avg_cnt_lbl"
+            />
+
         <Button
             android:id="@+id/button_settings_save"
             android:layout_width="match_parent"
@@ -50,8 +79,8 @@
             android:textAlignment="center"
             android:textSize="40sp"
             android:text="@string/button_settings_save"
-            app:layout_constraintLeft_toLeftOf="@id/edit_settings_work_period_minutes"
-            app:layout_constraintTop_toBottomOf="@id/edit_settings_work_period_minutes"
+            app:layout_constraintLeft_toLeftOf="@id/edit_settings_work_continuous_avg_cnt"
+            app:layout_constraintTop_toBottomOf="@id/edit_settings_work_continuous_avg_cnt"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
