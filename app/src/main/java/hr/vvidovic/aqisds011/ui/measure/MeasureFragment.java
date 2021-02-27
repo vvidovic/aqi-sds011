@@ -16,6 +16,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import java.time.Instant;
+
 import hr.vvidovic.aqisds011.R;
 import hr.vvidovic.aqisds011.Sds011ViewModel;
 import hr.vvidovic.aqisds011.data.Measurement;
@@ -77,6 +79,7 @@ public class MeasureFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 model.postWorkPeriodic(isChecked);
+                model.postMsg("last date-time: " + Instant.ofEpochMilli(model.getHistory().get(model.getHistory().size() -1).dateTime).toString());
             }
         });
 
