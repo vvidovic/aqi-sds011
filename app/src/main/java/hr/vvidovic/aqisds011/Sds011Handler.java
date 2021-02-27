@@ -59,21 +59,14 @@ public class Sds011Handler {
     private byte workPeriodReportedMinutes = 0;
 
     public Sds011Handler(Activity activity, Sds011ViewModel model, AppDatabase db) {
+        Log.i(getClass().getSimpleName(), "Sds011Handler()");
         this.model = model;
         this.db = db;
         initUsb(activity);
     }
 
-    private void mySleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
     public boolean start() {
+        Log.i(getClass().getSimpleName(), "start()");
         if(serial != null) {
             serial.write(constructCommand(CMD_SLEEP, MODE_SET, SLEEP_NOT));
 
@@ -83,6 +76,7 @@ public class Sds011Handler {
     }
 
     public boolean stop() {
+        Log.i(getClass().getSimpleName(), "stop()");
         if(serial != null) {
             serial.write(constructCommand(CMD_SLEEP, MODE_SET, SLEEP_YES));
             return true;
@@ -92,6 +86,7 @@ public class Sds011Handler {
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void initUsb(Activity activity) {
+        Log.i(getClass().getSimpleName(), "initUsb()");
         usbManager = (UsbManager) activity.getSystemService(Context.USB_SERVICE);
 
         UsbDevice device = activity.getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
@@ -117,6 +112,7 @@ public class Sds011Handler {
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
 
         public void onReceive(Context context, Intent intent) {
+            Log.i(getClass().getSimpleName(), "BroadcastReceiver() lambda");
             String action = intent.getAction();
             if (ACTION_USB_PERMISSION.equals(action)) {
                 synchronized (this) {
@@ -139,6 +135,7 @@ public class Sds011Handler {
         @Override
         public void onReceivedData(final byte[] b)
         {
+            Log.i(getClass().getSimpleName(), "onReceivedData()");
 //            measureViewModel.postMsg(Arrays.toString(b));
             if (b.length == 10) {
                 if(b[1] == (byte)0xc0) {
@@ -147,9 +144,12 @@ public class Sds011Handler {
                     float pm10 = (256 * Math.abs(b[5]) + Math.abs(b[4])) / 10.0f;
 
                     Measurement m = new Measurement(pm25, pm10);
-                    db.measurementDao().insertAll(m);
+                    Measurement mToSave = model.postMeasurement(m);
 
-                    model.postMeasurement(m);
+                    // For continuous measurements - don't save each measurement
+                    if(mToSave != null) {
+                        db.measurementDao().insert(mToSave);
+                    }
                 }
                 // Sleep response
                 else if(b[1] == (byte)0xc5 && b[2] == (byte)6) {
@@ -206,6 +206,7 @@ public class Sds011Handler {
     PM10 data content: PM10 (ug/m3) = ((PM10 high byte*256 ) + PM10 low byte)/10
     */
     public void connect(UsbDevice device) {
+        Log.i(getClass().getSimpleName(), "connect(), sensor started: " + model.isSensorStarted());
 
         UsbDeviceConnection usbConnection = usbManager.openDevice(device);
         serial = UsbSerialDevice.createUsbSerialDevice(device, usbConnection);
@@ -220,20 +221,15 @@ public class Sds011Handler {
 
 
         serial.read(serialRespCallback);
-        serial.write(constructCommand(CMD_MODE, MODE_SET, MODE_ACTIVE));
-        serial.write(constructCommand(CMD_WORKING_PERIOD, (byte)1, workPeriodMinutes));
-        serial.write(constructCommand(CMD_SLEEP, MODE_SET, SLEEP_YES));
-    }
-
-    private byte[] constructCommand(final byte cmd) {
-        return constructCommand(cmd,(byte)0);
-    }
-
-    private byte[] constructCommand(final byte cmd, final byte cmd2) {
-        return constructCommand(cmd, cmd2, (byte)0);
+        if(!model.isSensorStarted()) {
+            serial.write(constructCommand(CMD_MODE, MODE_SET, MODE_ACTIVE));
+            serial.write(constructCommand(CMD_WORKING_PERIOD, (byte)1, workPeriodMinutes));
+            serial.write(constructCommand(CMD_SLEEP, MODE_SET, SLEEP_YES));
+        }
     }
 
     private byte[] constructCommand(final byte cmd, final byte cmd2, final byte cmd3) {
+        Log.i(getClass().getSimpleName(), "constructCommand()");
         final byte[] command = new byte[19];
         command[0] = (byte)0xaa;  // head
         command[1] = (byte)0xb4;  // command 1
@@ -253,7 +249,7 @@ public class Sds011Handler {
     }
 
     public void setWorkPeriodMinutes(byte workPeriodMinutes) {
+        Log.i(getClass().getSimpleName(), "setWorkPeriodMinutes()");
         this.workPeriodMinutes = workPeriodMinutes;
-//        serial.write(constructCommand(CMD_WORKING_PERIOD, (byte)1, workPeriodMinutes));
     }
 }

@@ -25,6 +25,7 @@ public class SettingsFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
+        Log.i(getClass().getSimpleName(), "onCreateView(), savedInstanceState: " + savedInstanceState);
         model = new ViewModelProvider(requireActivity()).get(Sds011ViewModel.class);
         View root = inflater.inflate(R.layout.fragment_settings, container, false);
 
@@ -57,7 +58,7 @@ public class SettingsFragment extends Fragment {
                     SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putInt(getString(R.string.settings_work_period_key), minutestByte);
-                    editor.putInt(getString(R.string.settings_work_continuous_avg_cnt), avgCount);
+                    editor.putInt(getString(R.string.settings_work_continuous_avg_cnt_key), avgCount);
                     editor.commit();
 
                     new AlertDialog.Builder(getContext())

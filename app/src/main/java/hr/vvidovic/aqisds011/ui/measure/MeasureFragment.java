@@ -2,6 +2,7 @@ package hr.vvidovic.aqisds011.ui.measure;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,12 +29,14 @@ public class MeasureFragment extends Fragment {
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        Log.i(getClass().getSimpleName(), "onActivityCreated()");
         super.onActivityCreated(savedInstanceState);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
+        Log.i(getClass().getSimpleName(), "onCreateView()");
         model = new ViewModelProvider(requireActivity()).get(Sds011ViewModel.class);
         View root = inflater.inflate(R.layout.fragment_measure, container, false);
 
@@ -79,7 +82,10 @@ public class MeasureFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 model.postWorkPeriodic(isChecked);
-                model.postMsg("last date-time: " + Instant.ofEpochMilli(model.getHistory().get(model.getHistory().size() -1).dateTime).toString());
+                model.postMsg("last date-time: " +
+                        Instant.ofEpochMilli(
+                                model.getHistory().getValue().get(
+                                        model.getHistory().getValue().size() -1).dateTime).toString());
             }
         });
 
@@ -111,6 +117,7 @@ public class MeasureFragment extends Fragment {
     }
 
     private void updateButtonsEnabled(View root, boolean started) {
+        Log.i(getClass().getSimpleName(), "updateButtonsEnabled()");
         ToggleButton tbMode = root.findViewById(R.id.toggle_measure_mode);
         Button btnStart = root.findViewById(R.id.button_measure_start);
         Button btnStop = root.findViewById(R.id.button_measure_stop);

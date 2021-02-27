@@ -12,5 +12,5 @@ public interface MeasurementDao {
     List<Measurement> getAll();
 
     @Insert
-    void insertAll(Measurement... measurements);
+    void insert(Measurement... measurements);
 }

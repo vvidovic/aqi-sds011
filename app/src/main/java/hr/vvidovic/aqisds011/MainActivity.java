@@ -3,7 +3,10 @@ package hr.vvidovic.aqisds011;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.PersistableBundle;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -15,6 +18,8 @@ import androidx.room.Room;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 import hr.vvidovic.aqisds011.data.AppDatabase;
 import hr.vvidovic.aqisds011.data.Measurement;
@@ -28,6 +33,28 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(getClass().getSimpleName(), "onCreate(), savedInstanceState: " + savedInstanceState);
+
+        model = new ViewModelProvider(this).get(Sds011ViewModel.class);
+
+        // Read / init settings.
+        SharedPreferences prefs = this.getPreferences(Context.MODE_PRIVATE);
+
+        model.setWorkPeriodic(
+                prefs.getBoolean(getString(R.string.settings_work_periodic_key),
+                        Sds011ViewModel.DEFAULT_WP));
+        model.setWorkPeriodMinutes(
+                (byte) prefs.getInt(getString(R.string.settings_work_period_key),
+                        Sds011ViewModel.DEFAULT_WP_MINUTES));
+
+        model.setWorkContinuousAverageCount(
+                prefs.getInt(getString(R.string.settings_work_continuous_avg_cnt_key),
+                        Sds011ViewModel.DEFAULT_WC_CNT));
+
+        model.setSensorStarted(
+                prefs.getBoolean(getString(R.string.settings_sensor_started_key),
+                        Sds011ViewModel.DEFAULT_SENSOR_STARTED));
+
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -41,63 +68,23 @@ public class MainActivity extends AppCompatActivity {
 
         db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "aqi-sds011")
                 .allowMainThreadQueries().build();
-
-        model = new ViewModelProvider(this).get(Sds011ViewModel.class);
         List<Measurement> history = db.measurementDao().getAll();
         model.setHistory(history);
         Sds011Handler sds011Handler = new Sds011Handler(this, model, db);
         model.setSds011Handler(sds011Handler);
-
-        // Read / init settings.
-        SharedPreferences prefs = this.getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-
-        if(!prefs.contains(getString(R.string.settings_work_periodic_key))) {
-            editor.putBoolean(
-                    getString(R.string.settings_work_periodic_key), Sds011ViewModel.DEFAULT_WP);
-            editor.apply();
-            model.setWorkPeriodic(Sds011ViewModel.DEFAULT_WP);
-        }
-        else {
-            model.setWorkPeriodic(
-                    prefs.getBoolean(getString(R.string.settings_work_periodic_key),
-                            Sds011ViewModel.DEFAULT_WP));
-        }
-
-        if(!prefs.contains(getString(R.string.settings_work_period_key))) {
-            editor.putInt(
-                    getString(R.string.settings_work_period_key), Sds011ViewModel.DEFAULT_WP_MINUTES);
-            editor.apply();
-            model.setWorkPeriodMinutes(Sds011ViewModel.DEFAULT_WP_MINUTES);
-        }
-        else {
-            model.setWorkPeriodMinutes(
-                    (byte)prefs.getInt(getString(R.string.settings_work_period_key),
-                            Sds011ViewModel.DEFAULT_WP_MINUTES));
-        }
-
-        if(!prefs.contains(getString(R.string.settings_work_continuous_avg_cnt))) {
-            editor.putInt(
-                    getString(R.string.settings_work_continuous_avg_cnt), Sds011ViewModel.DEFAULT_WC_CNT);
-            editor.apply();
-            model.setWorkContinuousAverageCount(Sds011ViewModel.DEFAULT_WC_CNT);
-        }
-        else {
-            model.setWorkContinuousAverageCount(
-                    prefs.getInt(getString(R.string.settings_work_continuous_avg_cnt),
-                            Sds011ViewModel.DEFAULT_WC_CNT));
-        }
-
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.i(getClass().getSimpleName(), "onDestroy()");
 
         SharedPreferences prefs = this.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean(
-                getString(R.string.settings_work_periodic_key), model.isWorkPeriodic());
-        editor.apply();
+
+        editor.putBoolean(getString(R.string.settings_work_periodic_key), model.isWorkPeriodic());
+        editor.putBoolean(getString(R.string.settings_sensor_started_key), model.isSensorStarted());
+
+        editor.commit();
     }
 }

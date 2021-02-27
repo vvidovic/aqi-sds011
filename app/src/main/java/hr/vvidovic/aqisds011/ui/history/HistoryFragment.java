@@ -15,11 +15,14 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import hr.vvidovic.aqisds011.R;
 import hr.vvidovic.aqisds011.Sds011ViewModel;
@@ -34,14 +37,14 @@ public class HistoryFragment extends Fragment {
         model = new ViewModelProvider(requireActivity()).get(Sds011ViewModel.class);
         View root = inflater.inflate(R.layout.fragment_history, container, false);
 
-        final TableLayout tl = root.findViewById(R.id.table_history);
+        refreshTable(root);
 
-        // Add header
-        tl.addView(createRowHeader(root,"date-time", "AQI", "PM2.5", "AQI", "PM10"));
-        // Add data
-        for (Measurement m: model.getHistory()) {
-            tl.addView(createRow(root, m));
-        }
+        model.getHistory().observe(getViewLifecycleOwner(), new Observer<List<Measurement>>() {
+            @Override
+            public void onChanged(@Nullable List<Measurement> m) {
+                refreshTable(root);
+            }
+        });
 
         final Button buttonClear = root.findViewById(R.id.button_history_clear);
         final Button buttonExport = root.findViewById(R.id.button_history_export);
@@ -69,6 +72,19 @@ public class HistoryFragment extends Fragment {
         });
 
         return root;
+    }
+
+    private void refreshTable(View root) {
+        final TableLayout tl = root.findViewById(R.id.table_history);
+        tl.removeAllViews();
+
+        // Add header
+        tl.addView(createRowHeader(root,"date-time", "AQI", "PM2.5", "AQI", "PM10"));
+        // Add data
+        for (Measurement m: model.getHistory().getValue()) {
+            tl.addView(createRow(root, m));
+        }
+
     }
 
     private TableRow createRowHeader(View root,

@@ -1,10 +1,11 @@
 package hr.vvidovic.aqisds011;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +15,7 @@ public class Sds011ViewModel extends ViewModel {
     public static final byte DEFAULT_WP_MINUTES = (byte)2;
     public static final boolean DEFAULT_WP = false;
     public static final int DEFAULT_WC_CNT = 30;
+    public static final boolean DEFAULT_SENSOR_STARTED = false;
 
     private Sds011Handler sds011Handler;
 
@@ -33,8 +35,14 @@ public class Sds011ViewModel extends ViewModel {
 
 
     public Sds011ViewModel() {
+        Log.i(getClass().getSimpleName(), "Sds011ViewModel()");
+//        workPeriodic.setValue(DEFAULT_WP);
+//        workPeriodMinutes.setValue(DEFAULT_WP_MINUTES);
+//        workContinuousAverageCount.setValue(DEFAULT_WC_CNT);
+//        sensorStarted.setValue(Boolean.FALSE);
+
         valueMeasurement.setValue(new Measurement());
-        sensorStarted.setValue(Boolean.FALSE);
+        valueMsg.setValue("");
         valueStatus.setValue("Stopped.");
 
         List<Measurement> h = new ArrayList<>();
@@ -42,14 +50,19 @@ public class Sds011ViewModel extends ViewModel {
     }
 
     public void setSds011Handler(Sds011Handler sds011Handler) {
+        Log.i(getClass().getSimpleName(), "setSds011Handler()");
         this.sds011Handler = sds011Handler;
     }
 
     public Sds011Handler getSds011Handler() {
+        Log.i(getClass().getSimpleName(), "getSds011Handler()");
         return sds011Handler;
     }
 
-    public void postMeasurement(Measurement m) {
+    public Measurement postMeasurement(Measurement m) {
+        Log.i(getClass().getSimpleName(), "postMeasurement(), periodic: " + isWorkPeriodic()
+                + ", wc avg cnt: " + getWorkContinuousAverageCount()
+                + ", cm avg hist size: " + continuousMeasurementAvgHist.size());
         postValueMeasurement(m);
 
         Measurement newM = null;
@@ -79,35 +92,47 @@ public class Sds011ViewModel extends ViewModel {
             newHist.add(newM);
             history.postValue(newHist);
         }
+
+        return newM;
     }
 
     public void postMsg(String msg) {
+        Log.i(getClass().getSimpleName(), "postMsg()");
         valueMsg.postValue(msg);
     }
 
     public void postStatus(String status) {
+        Log.i(getClass().getSimpleName(), "postStatus()");
         valueStatus.postValue(status);
     }
 
     public LiveData<Measurement> getValueMeasurement() {
+        Log.i(getClass().getSimpleName(), "getValueMeasurement()");
         return valueMeasurement;
     }
     private void postValueMeasurement(Measurement value) {
+        Log.i(getClass().getSimpleName(), "postValueMeasurement()");
         valueMeasurement.postValue(value);
     }
 
 
     public LiveData<String> getValueMsg() {
+        Log.i(getClass().getSimpleName(), "getValueMsg()");
         return valueMsg;
     }
 
-    public LiveData<String> getValueStatus() { return valueStatus; }
+    public LiveData<String> getValueStatus() {
+        Log.i(getClass().getSimpleName(), "getValueStatus()");
+        return valueStatus;
+    }
 
     public void postWorkPeriodic(Boolean workPeriodic) {
+        Log.i(getClass().getSimpleName(), "postWorkPeriodic()");
         this.workPeriodic.postValue(workPeriodic);
         configureSensorWorkPeriodic(workPeriodic);
     }
     private void configureSensorWorkPeriodic(boolean workPeriodic) {
+        Log.i(getClass().getSimpleName(), "configureSensorWorkPeriodic()");
         if(workPeriodic) {
             sds011Handler.setWorkPeriodMinutes(workPeriodMinutes.getValue());
         }
@@ -116,30 +141,37 @@ public class Sds011ViewModel extends ViewModel {
         }
     }
     public boolean isWorkPeriodic() {
+        Log.i(getClass().getSimpleName(), "isWorkPeriodic()");
         return workPeriodic.getValue();
     }
     public void setWorkPeriodic(boolean periodic) {
+        Log.i(getClass().getSimpleName(), "setWorkPeriodic()");
         workPeriodic.setValue(periodic);
     }
     public Byte getWorkPeriodMinutes() {
+        Log.i(getClass().getSimpleName(), "getWorkPeriodMinutes()");
         return workPeriodMinutes.getValue();
     }
     public void setWorkPeriodMinutes(Byte minutes) {
+        Log.i(getClass().getSimpleName(), "setWorkPeriodMinutes()");
         workPeriodMinutes.setValue(minutes);
     }
 
     public Integer getWorkContinuousAverageCount() {
+        Log.i(getClass().getSimpleName(), "getWorkContinuousAverageCount()");
         return workContinuousAverageCount.getValue();
     }
     public void setWorkContinuousAverageCount(Integer count) {
+        Log.i(getClass().getSimpleName(), "setWorkContinuousAverageCount()");
         workContinuousAverageCount.setValue(count);
     }
 
-    public void postSensorStarted(Boolean sensorStarted) {
-        this.sensorStarted.postValue(sensorStarted);
+    public void postSensorStarted(Boolean started) {
+        Log.i(getClass().getSimpleName(), "postSensorStarted()");
+        sensorStarted.postValue(started);
         // Update sensor handler workPeriodic value.
         configureSensorWorkPeriodic(workPeriodic.getValue());
-        if(sensorStarted) {
+        if(started) {
             if(sds011Handler.start()) {
                 postMsg("Started");
                 if(isWorkPeriodic()) {
@@ -165,19 +197,21 @@ public class Sds011ViewModel extends ViewModel {
             }
         }
     }
+    public void setSensorStarted(Boolean started) {
+        Log.i(getClass().getSimpleName(), "setSensorStarted()");
+        sensorStarted.setValue(started);
+    }
     public boolean isSensorStarted() {
+        Log.i(getClass().getSimpleName(), "isSensorStarted()");
         return sensorStarted.getValue();
     }
 
-    public void addToHistory(Measurement measurement) {
-        List<Measurement> newHistory = history.getValue();
-        newHistory.add(measurement);
-        history.postValue(newHistory);
-    }
     public void setHistory(List<Measurement> history) {
+        Log.i(getClass().getSimpleName(), "setHistory()");
         this.history.postValue(history);
     }
-    public List<Measurement> getHistory() {
-        return history.getValue();
+    public MutableLiveData<List<Measurement>> getHistory() {
+        Log.i(getClass().getSimpleName(), "getHistory()");
+        return history;
     }
 }
