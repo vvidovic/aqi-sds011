@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.room.Room;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ import java.util.List;
 
 import hr.vvidovic.aqisds011.R;
 import hr.vvidovic.aqisds011.Sds011ViewModel;
+import hr.vvidovic.aqisds011.data.AppDatabase;
 import hr.vvidovic.aqisds011.data.Measurement;
 
 public class HistoryFragment extends Fragment {
@@ -46,16 +48,30 @@ public class HistoryFragment extends Fragment {
             }
         });
 
+        final AppDatabase db = Room.databaseBuilder(getContext(), AppDatabase.class, "aqi-sds011")
+                .allowMainThreadQueries().build();
+
         final Button buttonClear = root.findViewById(R.id.button_history_clear);
         final Button buttonExport = root.findViewById(R.id.button_history_export);
         buttonClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new AlertDialog.Builder(getContext())
-                        .setTitle("TODO")
-                        .setMessage("Not yet implemented")
-                        .setIcon(R.drawable.ic_baseline_info_24)
-                        .setPositiveButton("OK", null)
+                        .setTitle("Delete history")
+                        .setMessage("Are you sure you want to delete all history data?")
+                        .setIcon(R.drawable.ic_baseline_error_24)
+                        .setPositiveButton("OK", (dialog, which) -> {
+                            db.measurementDao().deleteAll();
+                            model.getHistory().getValue().clear();
+                            model.setHistory(model.getHistory().getValue());
+                            new AlertDialog.Builder(getContext())
+                                    .setTitle("Deleted")
+                                    .setMessage("History deleted.")
+                                    .setIcon(R.drawable.ic_baseline_info_24)
+                                    .setPositiveButton("OK", null)
+                                    .show();
+                        })
+                        .setNegativeButton("NO", null)
                         .show();
             }
         });
