@@ -18,6 +18,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.time.Instant;
+import java.util.List;
 
 import hr.vvidovic.aqisds011.R;
 import hr.vvidovic.aqisds011.Sds011ViewModel;
@@ -82,10 +83,15 @@ public class MeasureFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 model.postWorkPeriodic(isChecked);
-                model.postMsg("last date-time: " +
-                        Instant.ofEpochMilli(
-                                model.getHistory().getValue().get(
-                                        model.getHistory().getValue().size() -1).dateTime).toString());
+                final List<Measurement> history = model.getHistory().getValue();
+                final String lastMeasurement;
+                if(history.isEmpty()) {
+                    lastMeasurement = "no history";
+                }
+                else {
+                    lastMeasurement = Instant.ofEpochMilli(history.get(history.size() -1).dateTime).toString();
+                }
+                model.postMsg("last date-time: " + lastMeasurement);
             }
         });
 
