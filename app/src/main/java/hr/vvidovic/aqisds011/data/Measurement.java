@@ -4,6 +4,7 @@ import android.graphics.Color;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.time.Instant;
@@ -26,6 +27,7 @@ public class Measurement {
     public Measurement() {
     }
 
+    @Ignore
     public Measurement(float pm25, float pm10) {
         this.dateTime = Instant.now().toEpochMilli();
         this.pm25 = pm25;
