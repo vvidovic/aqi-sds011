@@ -8,7 +8,7 @@
     <string name="button_continuous">CONTINUOUS</string>
     <string name="button_periodic">PERIODIC</string>
     <string name="button_settings_save">Save</string>
-    <string name="button_history_clear">Delete All</string>
+    <string name="button_history_clear">Delete</string>
     <string name="button_history_export">Export</string>
 
     <string name="settings_work_period_key">work_period</string>
