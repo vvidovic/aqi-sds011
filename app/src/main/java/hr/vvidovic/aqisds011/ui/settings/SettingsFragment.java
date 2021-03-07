@@ -9,13 +9,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.gms.location.LocationRequest;
+
+import hr.vvidovic.aqisds011.LocationHandler;
 import hr.vvidovic.aqisds011.R;
 import hr.vvidovic.aqisds011.Sds011ViewModel;
 
@@ -28,6 +33,13 @@ public class SettingsFragment extends Fragment {
         Log.i(getClass().getSimpleName(), "onCreateView(), savedInstanceState: " + savedInstanceState);
         model = new ViewModelProvider(requireActivity()).get(Sds011ViewModel.class);
         View root = inflater.inflate(R.layout.fragment_settings, container, false);
+
+        Spinner spinner = root.findViewById(R.id.spinner_settings_location);
+        String[] locationOptions = getResources().getStringArray(R.array.settings_location_selection);
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<String>(getContext(), R.layout.spinner_item, locationOptions);
+        spinner.setAdapter(adapter);
+        spinner.setSelection(getLocationSelection());
 
         final EditText editWorkPeriod = root.findViewById(R.id.edit_settings_work_period_minutes);
         editWorkPeriod.setText(model.getWorkPeriodMinutes().toString());
@@ -52,13 +64,17 @@ public class SettingsFragment extends Fragment {
                         throw new NumberFormatException("1 <= number of averaging measurements.");
                     }
 
+                    int locationPriority = getLocationPriority(spinner);
+
                     model.setWorkPeriodMinutes(minutestByte);
                     model.setWorkContinuousAverageCount(avgCount);
+                    model.setLocationPriority(locationPriority);
 
                     SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putInt(getString(R.string.settings_work_period_key), minutestByte);
                     editor.putInt(getString(R.string.settings_work_continuous_avg_cnt_key), avgCount);
+                    editor.putInt(getString(R.string.settings_location_priority_key), locationPriority);
                     editor.commit();
 
                     new AlertDialog.Builder(getContext())
@@ -67,6 +83,7 @@ public class SettingsFragment extends Fragment {
                             .setIcon(R.drawable.ic_baseline_info_24)
                             .setPositiveButton("OK", null)
                             .show();
+
                 }
                 catch (NumberFormatException e) {
                     new AlertDialog.Builder(getContext())
@@ -80,5 +97,55 @@ public class SettingsFragment extends Fragment {
         });
 
         return root;
+    }
+
+    private int getLocationSelection() {
+        switch (model.getLocationPriority()) {
+            case LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY:
+                return 1;
+            case LocationRequest.PRIORITY_HIGH_ACCURACY:
+                return 2;
+            default:
+                return 0;
+        }
+    }
+
+    private int getLocationPriority(Spinner spinner) {
+        Log.i(getTag(), "getLocationPriority()");
+
+        String loc = spinner.getSelectedItem().toString();
+
+        final boolean locationSetOk;
+        final int locationPriority;
+        if(loc.equals(getString(R.string.settings_location_high_accuracy))) {
+            locationSetOk = LocationHandler.instance.setLocationPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            locationPriority = LocationRequest.PRIORITY_HIGH_ACCURACY;
+        }
+        else if(loc.equals(getString(R.string.settings_location_low_power))) {
+            locationSetOk = LocationHandler.instance.setLocationPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+            locationPriority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
+        }
+        else {
+            locationSetOk = true;
+            locationPriority = LocationHandler.LOCATION_DISABLED;
+        }
+        Log.i(getTag(), "locationSetOk: " + locationSetOk);
+
+        if(locationPriority != LocationHandler.LOCATION_DISABLED) {
+            LocationHandler.instance.updateLocationLastLocation();
+        }
+
+        if(!locationSetOk) {
+            spinner.setSelection(0);
+
+            new AlertDialog.Builder(getContext())
+                    .setTitle("Error")
+                    .setMessage("Can't change location settings.")
+                    .setIcon(R.drawable.ic_baseline_error_24)
+                    .setPositiveButton("OK", null)
+                    .show();
+        }
+
+        return locationPriority;
     }
 }

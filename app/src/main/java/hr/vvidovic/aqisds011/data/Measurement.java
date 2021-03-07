@@ -1,6 +1,7 @@
 package hr.vvidovic.aqisds011.data;
 
 import android.graphics.Color;
+import android.location.Location;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -23,6 +24,14 @@ public class Measurement {
     public float pm25;
     @ColumnInfo(name = "pm_10")
     public float pm10;
+    @ColumnInfo(name = "loc_accuracy")
+    public float locAccuracy;
+    @ColumnInfo(name = "loc_time")
+    public long locDateTime;
+    @ColumnInfo(name = "loc_latitude")
+    public double locLatitude;
+    @ColumnInfo(name = "loc_longitude")
+    public double locLongitude;
 
     public Measurement() {
     }
@@ -32,6 +41,17 @@ public class Measurement {
         this.dateTime = Instant.now().toEpochMilli();
         this.pm25 = pm25;
         this.pm10 = pm10;
+    }
+
+    @Ignore
+    public Measurement(float pm25, float pm10, Location location) {
+        this(pm25, pm10);
+        if(location != null) {
+            this.locAccuracy = location.getAccuracy();
+            this.locDateTime = location.getTime();
+            this.locLatitude = location.getLatitude();
+            this.locLongitude = location.getLongitude();
+        }
     }
 
     public int aqiPm25() {
@@ -48,6 +68,10 @@ public class Measurement {
 
     public int aqiPm10() {
         return calcAQIpm10(pm10);
+    }
+
+    public boolean hasLocation() {
+        return locDateTime > 0;
     }
 
     public enum Category {
@@ -153,5 +177,19 @@ public class Measurement {
             aqipm10 = ((aqi8 - aqi7) / (pm8 - pm7)) * (pm10 - pm7) + aqi7;
         }
         return (int)Math.round(aqipm10);
+    }
+
+    @Override
+    public String toString() {
+        return "Measurement{" +
+                "id=" + id +
+                ", dateTime=" + dateTime +
+                ", pm25=" + pm25 +
+                ", pm10=" + pm10 +
+                ", locAccuracy=" + locAccuracy +
+                ", locLatitude=" + locLatitude +
+                ", locLongitude=" + locLongitude +
+                ", locDateTime=" + locDateTime +
+                '}';
     }
 }

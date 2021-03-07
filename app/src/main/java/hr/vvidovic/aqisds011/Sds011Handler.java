@@ -24,6 +24,8 @@ import hr.vvidovic.aqisds011.data.AppDatabase;
 import hr.vvidovic.aqisds011.data.Measurement;
 
 public class Sds011Handler {
+    public static final Sds011Handler instance = new Sds011Handler();
+
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
     // SDS011 identifiers
     private static final int PRODUCT_ID = 29987;
@@ -58,8 +60,8 @@ public class Sds011Handler {
     private byte workPeriodMinutes = 0;
     private byte workPeriodReportedMinutes = 0;
 
-    public Sds011Handler(Activity activity, Sds011ViewModel model, AppDatabase db) {
-        Log.i(getClass().getSimpleName(), "Sds011Handler()");
+    public void init(Activity activity, Sds011ViewModel model, AppDatabase db) {
+        Log.i(getClass().getSimpleName(), "init()");
         this.model = model;
         this.db = db;
         initUsb(activity);
@@ -136,14 +138,13 @@ public class Sds011Handler {
         public void onReceivedData(final byte[] b)
         {
             Log.i(getClass().getSimpleName(), "onReceivedData()");
-//            measureViewModel.postMsg(Arrays.toString(b));
             if (b.length == 10) {
                 if(b[1] == (byte)0xc0) {
                     model.postMsg("Measuring, wp: " + workPeriodReportedMinutes + " - " + LocalDateTime.now().toString());
                     float pm25 = (256 * Math.abs(b[3]) + Math.abs(b[2])) / 10.0f;
                     float pm10 = (256 * Math.abs(b[5]) + Math.abs(b[4])) / 10.0f;
 
-                    Measurement m = new Measurement(pm25, pm10);
+                    Measurement m = new Measurement(pm25, pm10, model.getLocation());
                     Measurement mToSave = model.postMeasurement(m);
 
                     // For continuous measurements - don't save each measurement

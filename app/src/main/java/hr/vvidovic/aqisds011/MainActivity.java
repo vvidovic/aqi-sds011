@@ -1,13 +1,16 @@
 package hr.vvidovic.aqisds011;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -15,11 +18,14 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.room.Room;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 
 import hr.vvidovic.aqisds011.data.AppDatabase;
 import hr.vvidovic.aqisds011.data.Measurement;
@@ -55,6 +61,10 @@ public class MainActivity extends AppCompatActivity {
                 prefs.getBoolean(getString(R.string.settings_sensor_started_key),
                         Sds011ViewModel.DEFAULT_SENSOR_STARTED));
 
+        model.setLocationPriority(
+                prefs.getInt(getString(R.string.settings_location_priority_key),
+                        LocationHandler.LOCATION_DISABLED));
+
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -70,8 +80,14 @@ public class MainActivity extends AppCompatActivity {
                 .allowMainThreadQueries().build();
         List<Measurement> history = db.measurementDao().getAll();
         model.setHistory(history);
-        Sds011Handler sds011Handler = new Sds011Handler(this, model, db);
-        model.setSds011Handler(sds011Handler);
+        Sds011Handler.instance.init(this, model, db);
+
+        LocationHandler.instance.init(this, model);
+        Log.i(getClass().getSimpleName(), "Before checking location...");
+        LocationHandler.instance.updateLocationLastLocation();
+
+
+
     }
 
     @Override

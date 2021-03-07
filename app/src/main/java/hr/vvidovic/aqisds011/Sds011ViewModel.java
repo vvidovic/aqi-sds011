@@ -1,5 +1,6 @@
 package hr.vvidovic.aqisds011;
 
+import android.location.Location;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -17,8 +18,6 @@ public class Sds011ViewModel extends ViewModel {
     public static final int DEFAULT_WC_CNT = 30;
     public static final boolean DEFAULT_SENSOR_STARTED = false;
 
-    private Sds011Handler sds011Handler;
-
     private final MutableLiveData<Boolean> workPeriodic = new MutableLiveData<>();
     private final MutableLiveData<Byte> workPeriodMinutes = new MutableLiveData<>();
     private final MutableLiveData<Integer> workContinuousAverageCount = new MutableLiveData<>();
@@ -28,35 +27,25 @@ public class Sds011ViewModel extends ViewModel {
     private final MutableLiveData<Measurement> valueMeasurement = new MutableLiveData<>();
     private final MutableLiveData<String> valueMsg = new MutableLiveData<>();
     private final MutableLiveData<String> valueStatus = new MutableLiveData<>();
+    private final MutableLiveData<Location> valueLocation = new MutableLiveData<>();
 
     private final MutableLiveData<List<Measurement>> history = new MutableLiveData<>();
 
     private final List<Measurement> continuousMeasurementAvgHist = new ArrayList<>();
 
 
+    private int locationPriority;
+
     public Sds011ViewModel() {
         Log.i(getClass().getSimpleName(), "Sds011ViewModel()");
-//        workPeriodic.setValue(DEFAULT_WP);
-//        workPeriodMinutes.setValue(DEFAULT_WP_MINUTES);
-//        workContinuousAverageCount.setValue(DEFAULT_WC_CNT);
-//        sensorStarted.setValue(Boolean.FALSE);
 
         valueMeasurement.setValue(new Measurement());
+        valueLocation.setValue(null);
         valueMsg.setValue("");
         valueStatus.setValue("Stopped.");
 
         List<Measurement> h = new ArrayList<>();
         history.setValue(h);
-    }
-
-    public void setSds011Handler(Sds011Handler sds011Handler) {
-        Log.i(getClass().getSimpleName(), "setSds011Handler()");
-        this.sds011Handler = sds011Handler;
-    }
-
-    public Sds011Handler getSds011Handler() {
-        Log.i(getClass().getSimpleName(), "getSds011Handler()");
-        return sds011Handler;
     }
 
     public Measurement postMeasurement(Measurement m) {
@@ -79,6 +68,10 @@ public class Sds011ViewModel extends ViewModel {
 
                 newM = new Measurement((float)pm25sum/cCount, (float)pm10sum/cCount);
                 newM.dateTime = m.dateTime;
+                newM.locAccuracy = m.locAccuracy;
+                newM.locDateTime = m.locDateTime;
+                newM.locLatitude = m.locLatitude;
+                newM.locLongitude = m.locLongitude;
                 continuousMeasurementAvgHist.clear();
             }
         }
@@ -134,10 +127,10 @@ public class Sds011ViewModel extends ViewModel {
     private void configureSensorWorkPeriodic(boolean workPeriodic) {
         Log.i(getClass().getSimpleName(), "configureSensorWorkPeriodic()");
         if(workPeriodic) {
-            sds011Handler.setWorkPeriodMinutes(workPeriodMinutes.getValue());
+            Sds011Handler.instance.setWorkPeriodMinutes(workPeriodMinutes.getValue());
         }
         else {
-            sds011Handler.setWorkPeriodMinutes((byte)0);
+            Sds011Handler.instance.setWorkPeriodMinutes((byte)0);
         }
     }
     public boolean isWorkPeriodic() {
@@ -172,7 +165,7 @@ public class Sds011ViewModel extends ViewModel {
         // Update sensor handler workPeriodic value.
         configureSensorWorkPeriodic(workPeriodic.getValue());
         if(started) {
-            if(sds011Handler.start()) {
+            if(Sds011Handler.instance.start()) {
                 postMsg("Started");
                 if(isWorkPeriodic()) {
                     postStatus("Running in the PERIODIC mode.");
@@ -187,7 +180,7 @@ public class Sds011ViewModel extends ViewModel {
             }
         }
         else {
-            if(sds011Handler.stop()) {
+            if(Sds011Handler.instance.stop()) {
                 postMsg("Stopped");
                 postStatus("");
             }
@@ -213,5 +206,20 @@ public class Sds011ViewModel extends ViewModel {
     public MutableLiveData<List<Measurement>> getHistory() {
         Log.i(getClass().getSimpleName(), "getHistory()");
         return history;
+    }
+    public void setLocation(Location location) {
+        Log.i(getClass().getSimpleName(), "setLocation(" + location + ")");
+        this.valueLocation.setValue(location);
+    }
+    public Location getLocation() {
+        Log.i(getClass().getSimpleName(), "getLocation()");
+        return this.valueLocation.getValue();
+    }
+
+    public int getLocationPriority() {
+        return this.locationPriority;
+    }
+    public void setLocationPriority(int locationPriority) {
+        this.locationPriority = locationPriority;
     }
 }

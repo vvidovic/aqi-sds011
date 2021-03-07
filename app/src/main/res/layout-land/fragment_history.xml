@@ -22,7 +22,6 @@
         </TableLayout>
     </ScrollView>
 
-
     <LinearLayout
         android:id="@+id/layout_history_controls"
         android:layout_width="wrap_content"

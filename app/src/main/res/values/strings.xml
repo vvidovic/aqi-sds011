@@ -15,4 +15,14 @@
     <string name="settings_work_periodic_key">work_periodic</string>
     <string name="settings_work_continuous_avg_cnt_key">work_cont_avg_cnt</string>
     <string name="settings_sensor_started_key">sensor_started</string>
+    <string name="settings_location_priority_key">location_priority</string>
+
+    <string name="settings_location_no_location">No location</string>
+    <string name="settings_location_low_power">Low power</string>
+    <string name="settings_location_high_accuracy">High accuracy</string>
+    <array name="settings_location_selection">
+        <item>@string/settings_location_no_location</item>
+        <item>@string/settings_location_low_power</item>
+        <item>@string/settings_location_high_accuracy</item>
+    </array>
 </resources>

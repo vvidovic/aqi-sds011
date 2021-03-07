@@ -2,9 +2,12 @@ package hr.vvidovic.aqisds011.ui.history;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +19,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -23,6 +27,9 @@ import androidx.room.Room;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 
 import hr.vvidovic.aqisds011.R;
@@ -31,6 +38,7 @@ import hr.vvidovic.aqisds011.data.AppDatabase;
 import hr.vvidovic.aqisds011.data.Measurement;
 
 public class HistoryFragment extends Fragment {
+    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private Sds011ViewModel model;
 
@@ -95,10 +103,14 @@ public class HistoryFragment extends Fragment {
         tl.removeAllViews();
 
         // Add header
-        tl.addView(createRowHeader(root,"date-time", "AQI", "PM2.5", "AQI", "PM10"));
+        tl.addView(createRowHeader(root,"date-time",
+                "AQI", "PM2.5",
+                "AQI", "PM10",
+                "map"));
         // Add data
         for (Measurement m: model.getHistory().getValue()) {
             tl.addView(createRow(root, m));
+            Log.i(getTag(), m.toString());
         }
 
     }
@@ -106,13 +118,15 @@ public class HistoryFragment extends Fragment {
     private TableRow createRowHeader(View root,
                                      String dateTime,
                                      String pm25aqi, String pm25,
-                                     String pm10aqi, String pm10) {
+                                     String pm10aqi, String pm10,
+                                     String location) {
         TableRow tr = new TableRow(root.getContext());
         tr.addView(createCell(root, dateTime, 0, Gravity.CENTER));
         tr.addView(createCell(root, pm25aqi, 0, Gravity.CENTER));
         tr.addView(createCell(root, pm25, 0, Gravity.CENTER));
         tr.addView(createCell(root, pm10aqi, 0, Gravity.CENTER));
         tr.addView(createCell(root, pm10, 0, Gravity.CENTER));
+        tr.addView(createCell(root, location, 0, Gravity.CENTER));
 
         return tr;
     }
@@ -121,6 +135,7 @@ public class HistoryFragment extends Fragment {
                                String dateTime,
                                String pm25aqi, String pm25, Measurement.Category pm25Category,
                                String pm10aqi, String pm10, Measurement.Category pm10Category,
+                               boolean location, double latitude, double longitude,
                                int gravity) {
         TableRow tr = new TableRow(root.getContext());
         tr.addView(createCell(root, dateTime,0, gravity));
@@ -129,18 +144,26 @@ public class HistoryFragment extends Fragment {
         tr.addView(createCell(root, pm10aqi, pm10Category.color, gravity));
         tr.addView(createCell(root, pm10, pm10Category.color, gravity));
 
+        if(location) {
+            tr.addView(createMapsLocation(root, latitude, longitude));
+        }
         return tr;
     }
 
     private TableRow createRow(View root, Measurement m) {
+        LocalDateTime dt =
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(m.dateTime), ZoneId.systemDefault());
         return createRow(root,
-                Instant.ofEpochMilli(m.dateTime).toString(),
+                dateTimeFormatter.format(dt),
                 String.format("%d", m.aqiPm25()),
                 String.format("%01.2f", m.pm25),
                 m.aqiPm25Category(),
                 String.format("%d", m.aqiPm10()),
                 String.format("%01.2f", m.pm10),
                 m.aqiPm10Category(),
+                m.hasLocation(),
+                m.locLatitude,
+                m.locLongitude,
                 Gravity.RIGHT);
     }
 
@@ -150,6 +173,30 @@ public class HistoryFragment extends Fragment {
         tv.setText(val.toString());
         tv.setGravity(gravity);
         tv.setBackgroundColor(color);
+        return tv;
+    }
+
+    private View createMapsLocation(View root, double latitude, double longitude) {
+        TextView tv = new TextView(root.getContext());
+        tv.setPadding(10, 10, 10, 10);
+        tv.setText("show");
+        tv.setGravity(Gravity.CENTER);
+        tv.setTextColor(ContextCompat.getColor(getContext(), R.color.purple_500));
+
+        tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e(getTag(), latitude + "/" + longitude);
+
+                Uri mapsIntentUri = Uri.parse(
+                        String.format("geo:0,0?q=%s,%s(%s)",
+                                latitude, longitude, "Last+location"));
+                Intent mapIntent = new Intent(Intent.ACTION_VIEW, mapsIntentUri);
+//                mapIntent.setPackage("com.google.android.apps.maps");
+                startActivity(mapIntent);
+            }
+        });
+
         return tv;
     }
 }
