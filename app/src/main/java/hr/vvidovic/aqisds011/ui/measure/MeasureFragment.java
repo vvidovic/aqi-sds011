@@ -82,7 +82,7 @@ public class MeasureFragment extends Fragment {
         tbMode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                model.postWorkPeriodic(isChecked);
+                model.setWorkPeriodic(isChecked);
                 final List<Measurement> history = model.getHistory().getValue();
                 final String lastMeasurement;
                 if(history.isEmpty()) {
@@ -101,7 +101,7 @@ public class MeasureFragment extends Fragment {
             public void onClick(View v) {
                 tbMode.setEnabled(false);
                 model.postMsg("Starting...");
-                model.postSensorStarted(true);
+                model.setSensorRunningState(true);
                 updateButtonsEnabled(root, true);
             }
         });
@@ -112,7 +112,7 @@ public class MeasureFragment extends Fragment {
             public void onClick(View v) {
                 tbMode.setEnabled(true);
                 model.postMsg("Stopping...");
-                model.postSensorStarted(false);
+                model.setSensorRunningState(false);
                 updateButtonsEnabled(root, false);
             }
         });

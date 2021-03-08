@@ -18,29 +18,26 @@ public class Sds011ViewModel extends ViewModel {
     public static final int DEFAULT_WC_CNT = 30;
     public static final boolean DEFAULT_SENSOR_STARTED = false;
 
-    private final MutableLiveData<Boolean> workPeriodic = new MutableLiveData<>();
-    private final MutableLiveData<Byte> workPeriodMinutes = new MutableLiveData<>();
-    private final MutableLiveData<Integer> workContinuousAverageCount = new MutableLiveData<>();
-
-    private final MutableLiveData<Boolean> sensorStarted = new MutableLiveData<>();
-
     private final MutableLiveData<Measurement> valueMeasurement = new MutableLiveData<>();
     private final MutableLiveData<String> valueMsg = new MutableLiveData<>();
     private final MutableLiveData<String> valueStatus = new MutableLiveData<>();
-    private final MutableLiveData<Location> valueLocation = new MutableLiveData<>();
 
     private final MutableLiveData<List<Measurement>> history = new MutableLiveData<>();
 
+    private boolean workPeriodic;
+    private byte workPeriodMinutes;
+    private int workContinuousAverageCount;
+
+    private boolean sensorStarted;
+
     private final List<Measurement> continuousMeasurementAvgHist = new ArrayList<>();
-
-
+    private Location location;
     private int locationPriority;
 
     public Sds011ViewModel() {
         Log.i(getClass().getSimpleName(), "Sds011ViewModel()");
 
         valueMeasurement.setValue(new Measurement());
-        valueLocation.setValue(null);
         valueMsg.setValue("");
         valueStatus.setValue("Stopped.");
 
@@ -119,52 +116,48 @@ public class Sds011ViewModel extends ViewModel {
         return valueStatus;
     }
 
-    public void postWorkPeriodic(Boolean workPeriodic) {
-        Log.i(getClass().getSimpleName(), "postWorkPeriodic()");
-        this.workPeriodic.postValue(workPeriodic);
-        configureSensorWorkPeriodic(workPeriodic);
-    }
     private void configureSensorWorkPeriodic(boolean workPeriodic) {
-        Log.i(getClass().getSimpleName(), "configureSensorWorkPeriodic()");
+        Log.i(getClass().getSimpleName(), "configureSensorWorkPeriodic(" + workPeriodic + ")");
         if(workPeriodic) {
-            Sds011Handler.instance.setWorkPeriodMinutes(workPeriodMinutes.getValue());
+            Sds011Handler.instance.setWorkPeriodMinutes(workPeriodMinutes);
         }
         else {
             Sds011Handler.instance.setWorkPeriodMinutes((byte)0);
         }
     }
     public boolean isWorkPeriodic() {
-        Log.i(getClass().getSimpleName(), "isWorkPeriodic()");
-        return workPeriodic.getValue();
+        Log.i(getClass().getSimpleName(), "isWorkPeriodic(): " + workPeriodic);
+        return workPeriodic;
     }
-    public void setWorkPeriodic(boolean periodic) {
-        Log.i(getClass().getSimpleName(), "setWorkPeriodic()");
-        workPeriodic.setValue(periodic);
+    public void setWorkPeriodic(boolean workPeriodic) {
+        Log.i(getClass().getSimpleName(), "setWorkPeriodic(" + workPeriodic + ")");
+        this.workPeriodic = workPeriodic;
+        configureSensorWorkPeriodic(workPeriodic);
     }
     public Byte getWorkPeriodMinutes() {
-        Log.i(getClass().getSimpleName(), "getWorkPeriodMinutes()");
-        return workPeriodMinutes.getValue();
+        Log.i(getClass().getSimpleName(), "getWorkPeriodMinutes(): " + workPeriodMinutes);
+        return workPeriodMinutes;
     }
-    public void setWorkPeriodMinutes(Byte minutes) {
-        Log.i(getClass().getSimpleName(), "setWorkPeriodMinutes()");
-        workPeriodMinutes.setValue(minutes);
-    }
-
-    public Integer getWorkContinuousAverageCount() {
-        Log.i(getClass().getSimpleName(), "getWorkContinuousAverageCount()");
-        return workContinuousAverageCount.getValue();
-    }
-    public void setWorkContinuousAverageCount(Integer count) {
-        Log.i(getClass().getSimpleName(), "setWorkContinuousAverageCount()");
-        workContinuousAverageCount.setValue(count);
+    public void setWorkPeriodMinutes(byte workPeriodMinutes) {
+        Log.i(getClass().getSimpleName(), "setWorkPeriodMinutes(" + workPeriodMinutes +")");
+        this.workPeriodMinutes  = workPeriodMinutes;
     }
 
-    public void postSensorStarted(Boolean started) {
-        Log.i(getClass().getSimpleName(), "postSensorStarted()");
-        sensorStarted.postValue(started);
+    public int getWorkContinuousAverageCount() {
+        Log.i(getClass().getSimpleName(), "getWorkContinuousAverageCount(): " + workContinuousAverageCount);
+        return workContinuousAverageCount;
+    }
+    public void setWorkContinuousAverageCount(int workContinuousAverageCount) {
+        Log.i(getClass().getSimpleName(), "setWorkContinuousAverageCount(" + workContinuousAverageCount + ")");
+        this.workContinuousAverageCount = workContinuousAverageCount;
+    }
+
+    public void setSensorRunningState(boolean startSensor) {
+        Log.i(getClass().getSimpleName(), "changeSensorState(" + startSensor + ")");
+        setSensorStarted(startSensor);
         // Update sensor handler workPeriodic value.
-        configureSensorWorkPeriodic(workPeriodic.getValue());
-        if(started) {
+        configureSensorWorkPeriodic(workPeriodic);
+        if(startSensor) {
             if(Sds011Handler.instance.start()) {
                 postMsg("Started");
                 if(isWorkPeriodic()) {
@@ -190,13 +183,13 @@ public class Sds011ViewModel extends ViewModel {
             }
         }
     }
-    public void setSensorStarted(Boolean started) {
-        Log.i(getClass().getSimpleName(), "setSensorStarted()");
-        sensorStarted.setValue(started);
+    public void setSensorStarted(boolean sensorStarted) {
+        Log.i(getClass().getSimpleName(), "setSensorStarted(" + sensorStarted + ")");
+        this.sensorStarted = sensorStarted;
     }
     public boolean isSensorStarted() {
-        Log.i(getClass().getSimpleName(), "isSensorStarted()");
-        return sensorStarted.getValue();
+        Log.i(getClass().getSimpleName(), "isSensorStarted(): " + sensorStarted);
+        return sensorStarted;
     }
 
     public void setHistory(List<Measurement> history) {
@@ -209,17 +202,19 @@ public class Sds011ViewModel extends ViewModel {
     }
     public void setLocation(Location location) {
         Log.i(getClass().getSimpleName(), "setLocation(" + location + ")");
-        this.valueLocation.setValue(location);
+        this.location = location;
     }
     public Location getLocation() {
-        Log.i(getClass().getSimpleName(), "getLocation()");
-        return this.valueLocation.getValue();
+        Log.i(getClass().getSimpleName(), "getLocation(): " + location);
+        return this.location;
     }
 
     public int getLocationPriority() {
+        Log.i(getClass().getSimpleName(), "getLocationPriority(): " + this.locationPriority);
         return this.locationPriority;
     }
     public void setLocationPriority(int locationPriority) {
+        Log.i(getClass().getSimpleName(), "setLocationPriority(" + locationPriority + ")");
         this.locationPriority = locationPriority;
     }
 }

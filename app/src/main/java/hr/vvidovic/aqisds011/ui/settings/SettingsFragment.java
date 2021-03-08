@@ -45,7 +45,7 @@ public class SettingsFragment extends Fragment {
         editWorkPeriod.setText(model.getWorkPeriodMinutes().toString());
 
         final EditText editWorkContAvgCnt = root.findViewById(R.id.edit_settings_work_continuous_avg_cnt);
-        editWorkContAvgCnt.setText(model.getWorkContinuousAverageCount().toString());
+        editWorkContAvgCnt.setText(String.valueOf(model.getWorkContinuousAverageCount()));
 
         final Button buttonSave = root.findViewById(R.id.button_settings_save);
         buttonSave.setOnClickListener(new View.OnClickListener() {
@@ -54,7 +54,7 @@ public class SettingsFragment extends Fragment {
                 Editable minutesStr = editWorkPeriod.getText();
                 Editable avgCountStr = editWorkContAvgCnt.getText();
                 try {
-                    Byte minutestByte = Byte.valueOf(minutesStr.toString());
+                    byte minutestByte = Byte.valueOf(minutesStr.toString());
                     if(minutestByte < 0 || minutestByte > 30) {
                         throw new NumberFormatException("0 <= minutes <= 30.");
                     }
