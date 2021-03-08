@@ -92,6 +92,7 @@ public class Sds011Handler {
         usbManager = (UsbManager) activity.getSystemService(Context.USB_SERVICE);
 
         UsbDevice device = activity.getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
+        Log.i(getClass().getSimpleName(), "device: " + device);
         if (device != null) {
             // Device was attached, no need to ask for permissions
             connect(device);
@@ -114,7 +115,7 @@ public class Sds011Handler {
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
 
         public void onReceive(Context context, Intent intent) {
-            Log.i(getClass().getSimpleName(), "BroadcastReceiver() lambda");
+            Log.i(getClass().getSimpleName(), "BroadcastReceiver() onReceive()");
             String action = intent.getAction();
             if (ACTION_USB_PERMISSION.equals(action)) {
                 synchronized (this) {
@@ -209,23 +210,27 @@ public class Sds011Handler {
     public void connect(UsbDevice device) {
         Log.i(getClass().getSimpleName(), "connect(), sensor started: " + model.isSensorStarted());
 
-        UsbDeviceConnection usbConnection = usbManager.openDevice(device);
-        serial = UsbSerialDevice.createUsbSerialDevice(device, usbConnection);
+        try {
+            UsbDeviceConnection usbConnection = usbManager.openDevice(device);
+            serial = UsbSerialDevice.createUsbSerialDevice(device, usbConnection);
 
-        // Serial communication protocol: 9600 8N1. (Rate of 9600, data bits 8, parity none, stop bits 1)
-        serial.open();
-        serial.setBaudRate(9600);
-        serial.setDataBits(UsbSerialInterface.DATA_BITS_8);
-        serial.setParity(UsbSerialInterface.PARITY_NONE);
-        serial.setStopBits(UsbSerialInterface.STOP_BITS_1);
-        serial.setFlowControl(UsbSerialInterface. FLOW_CONTROL_OFF);
+            // Serial communication protocol: 9600 8N1. (Rate of 9600, data bits 8, parity none, stop bits 1)
+            serial.open();
+            serial.setBaudRate(9600);
+            serial.setDataBits(UsbSerialInterface.DATA_BITS_8);
+            serial.setParity(UsbSerialInterface.PARITY_NONE);
+            serial.setStopBits(UsbSerialInterface.STOP_BITS_1);
+            serial.setFlowControl(UsbSerialInterface. FLOW_CONTROL_OFF);
 
 
-        serial.read(serialRespCallback);
-        if(!model.isSensorStarted()) {
-            serial.write(constructCommand(CMD_MODE, MODE_SET, MODE_ACTIVE));
-            serial.write(constructCommand(CMD_WORKING_PERIOD, (byte)1, workPeriodMinutes));
-            serial.write(constructCommand(CMD_SLEEP, MODE_SET, SLEEP_YES));
+            serial.read(serialRespCallback);
+            if(!model.isSensorStarted()) {
+                serial.write(constructCommand(CMD_MODE, MODE_SET, MODE_ACTIVE));
+                serial.write(constructCommand(CMD_WORKING_PERIOD, (byte)1, workPeriodMinutes));
+                serial.write(constructCommand(CMD_SLEEP, MODE_SET, SLEEP_YES));
+            }
+        } catch (Exception e) {
+            model.postMsg("Error connecting to SDS011: " + e.getLocalizedMessage());
         }
     }
 
