@@ -55,10 +55,10 @@ public class LocationHandler {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
     }
 
-    public boolean updateLocationRequestSettings() {
+    public boolean updateLocationRequestSettings(int locationPriority) {
         Log.i(getClass().getSimpleName(), "setLocationPriority()");
         locationRequest = LocationRequest.create();
-        locationRequest.setPriority(model.getLocationPriority());
+        locationRequest.setPriority(locationPriority);
         // We want to receive location updates as often as we write measurements in the
         // continuous mode.
         // (sensor sends measurement each second: number of measurements * seconds)

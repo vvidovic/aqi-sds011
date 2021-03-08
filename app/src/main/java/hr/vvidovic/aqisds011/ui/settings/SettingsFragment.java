@@ -66,7 +66,7 @@ public class SettingsFragment extends Fragment {
 
                     model.setWorkPeriodMinutes(minutestByte);
                     model.setWorkContinuousAverageCount(avgCount);
-                    int locationPriority = getLocationPriority(spinner);
+                    int locationPriority = getLocationPriority(spinner); // uses model
                     model.setLocationPriority(locationPriority);
 
                     SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
@@ -117,16 +117,16 @@ public class SettingsFragment extends Fragment {
         final boolean locationSetOk;
         final int locationPriority;
         if(loc.equals(getString(R.string.settings_location_high_accuracy))) {
-            locationSetOk = LocationHandler.instance.updateLocationRequestSettings();
             locationPriority = LocationRequest.PRIORITY_HIGH_ACCURACY;
+            locationSetOk = LocationHandler.instance.updateLocationRequestSettings(locationPriority);
         }
         else if(loc.equals(getString(R.string.settings_location_low_power))) {
-            locationSetOk = LocationHandler.instance.updateLocationRequestSettings();
             locationPriority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
+            locationSetOk = LocationHandler.instance.updateLocationRequestSettings(locationPriority);
         }
         else {
-            locationSetOk = true;
             locationPriority = LocationHandler.LOCATION_DISABLED;
+            locationSetOk = true;
         }
         Log.i(getTag(), "locationSetOk: " + locationSetOk);
 
