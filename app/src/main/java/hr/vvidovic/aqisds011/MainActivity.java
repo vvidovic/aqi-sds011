@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
         LocationHandler.instance.init(this, model);
         Log.i(getClass().getSimpleName(), "Before checking location...");
+        LocationHandler.instance.updateLocationRequestSettings();
         LocationHandler.instance.updateLocationLastLocation();
 
 

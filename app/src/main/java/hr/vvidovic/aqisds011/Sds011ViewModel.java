@@ -88,6 +88,7 @@ public class Sds011ViewModel extends ViewModel {
 
     public void postMsg(String msg) {
         Log.i(getClass().getSimpleName(), "postMsg()");
+
         valueMsg.postValue(msg);
     }
 
@@ -160,6 +161,7 @@ public class Sds011ViewModel extends ViewModel {
         if(startSensor) {
             if(Sds011Handler.instance.start()) {
                 postMsg("Started");
+                LocationHandler.instance.startLocationUpdate();
                 if(isWorkPeriodic()) {
                     postStatus("Running in the PERIODIC mode.");
                 }
@@ -173,6 +175,7 @@ public class Sds011ViewModel extends ViewModel {
             }
         }
         else {
+            LocationHandler.instance.stopLocationUpdate();
             if(Sds011Handler.instance.stop()) {
                 postMsg("Stopped");
                 postStatus("");

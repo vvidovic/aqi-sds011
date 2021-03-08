@@ -59,15 +59,14 @@ public class SettingsFragment extends Fragment {
                         throw new NumberFormatException("0 <= minutes <= 30.");
                     }
 
-                    Integer avgCount = Integer.valueOf(avgCountStr.toString());
+                    int avgCount = Integer.valueOf(avgCountStr.toString());
                     if(avgCount < 1) {
                         throw new NumberFormatException("1 <= number of averaging measurements.");
                     }
 
-                    int locationPriority = getLocationPriority(spinner);
-
                     model.setWorkPeriodMinutes(minutestByte);
                     model.setWorkContinuousAverageCount(avgCount);
+                    int locationPriority = getLocationPriority(spinner);
                     model.setLocationPriority(locationPriority);
 
                     SharedPreferences prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
@@ -118,11 +117,11 @@ public class SettingsFragment extends Fragment {
         final boolean locationSetOk;
         final int locationPriority;
         if(loc.equals(getString(R.string.settings_location_high_accuracy))) {
-            locationSetOk = LocationHandler.instance.setLocationPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            locationSetOk = LocationHandler.instance.updateLocationRequestSettings();
             locationPriority = LocationRequest.PRIORITY_HIGH_ACCURACY;
         }
         else if(loc.equals(getString(R.string.settings_location_low_power))) {
-            locationSetOk = LocationHandler.instance.setLocationPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+            locationSetOk = LocationHandler.instance.updateLocationRequestSettings();
             locationPriority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
         }
         else {
