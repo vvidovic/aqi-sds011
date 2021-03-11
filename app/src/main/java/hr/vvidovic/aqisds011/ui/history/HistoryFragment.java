@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.util.Log;
 import android.view.Gravity;
@@ -72,12 +74,17 @@ public class HistoryFragment extends Fragment {
                             db.measurementDao().deleteAll();
                             model.getHistory().getValue().clear();
                             model.setHistory(model.getHistory().getValue());
-                            new AlertDialog.Builder(getContext())
-                                    .setTitle("Deleted")
-                                    .setMessage("History deleted.")
-                                    .setIcon(R.drawable.ic_baseline_info_24)
-                                    .setPositiveButton("OK", null)
-                                    .show();
+
+                            buttonClear.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.green));
+                            Handler deleteButtonColorHandler = new Handler(Looper.getMainLooper());
+                            deleteButtonColorHandler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if(buttonClear.isShown()) {
+                                        buttonClear.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.primary));
+                                    }
+                                }
+                            }, 1000);
                         })
                         .setNegativeButton("NO", null)
                         .show();
