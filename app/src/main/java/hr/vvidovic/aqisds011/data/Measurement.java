@@ -10,6 +10,8 @@ import androidx.room.PrimaryKey;
 
 import java.time.Instant;
 
+import hr.vvidovic.aqisds011.R;
+
 /*
 AQI calculation & coloring adapted from:
 https://github.com/zefanja/aqi/blob/master/html/aqi.js
@@ -75,12 +77,13 @@ public class Measurement {
     }
 
     public enum Category {
-        brown(300, "#592F2a"),
-        purple(200,"#89609E"),
-        red(150,"#870202"),
-        orange(100,"#E85C1C"),
-        yellow(50,"#F3D111"),
-        green(0,"#749B4F");
+        brown(300, R.color.brown),
+        purple(200,R.color.purple),
+        red(150,R.color.red),
+        orange(100,R.color.orange),
+        yellow(50, R.color.yellow),
+        green(0, R.color.green),
+        ;
 
         private final int aqiAtLeast;
         public final int color;
@@ -88,6 +91,11 @@ public class Measurement {
         Category(int aqiAtLeast, String color) {
             this.aqiAtLeast = aqiAtLeast;
             this.color = Color.parseColor(color);
+        }
+
+        Category(int aqiAtLeast, int color) {
+            this.aqiAtLeast = aqiAtLeast;
+            this.color = color;
         }
 
         public static Category fromAqi(int aqi) {

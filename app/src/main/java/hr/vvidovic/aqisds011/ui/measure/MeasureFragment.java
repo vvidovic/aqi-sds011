@@ -13,6 +13,7 @@ import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -58,13 +59,13 @@ public class MeasureFragment extends Fragment {
             public void onChanged(@Nullable Measurement m) {
                 textViewPm25.setText(String.format("%01.2f", m.pm25));
                 textViewPm25Aqi.setText(String.format("%d", m.aqiPm25()));
-                textViewPm25.setBackgroundColor(m.aqiPm25Category().color);
-                textViewPm25Aqi.setBackgroundColor(m.aqiPm25Category().color);
+                textViewPm25.setBackgroundColor(ContextCompat.getColor(getContext(), m.aqiPm25Category().color));
+                textViewPm25Aqi.setBackgroundColor(ContextCompat.getColor(getContext(), m.aqiPm25Category().color));
 
                 textViewPm10.setText(String.format("%01.2f", m.pm10));
                 textViewPm10Aqi.setText(String.format("%d", m.aqiPm10()));
-                textViewPm10.setBackgroundColor(m.aqiPm10Category().color);
-                textViewPm10Aqi.setBackgroundColor(m.aqiPm10Category().color);
+                textViewPm10.setBackgroundColor(ContextCompat.getColor(getContext(), m.aqiPm10Category().color));
+                textViewPm10Aqi.setBackgroundColor(ContextCompat.getColor(getContext(), m.aqiPm10Category().color));
             }
         });
 

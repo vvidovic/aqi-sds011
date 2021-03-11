@@ -139,10 +139,10 @@ public class HistoryFragment extends Fragment {
                                int gravity) {
         TableRow tr = new TableRow(root.getContext());
         tr.addView(createCell(root, dateTime,0, gravity));
-        tr.addView(createCell(root, pm25aqi, pm25Category.color, gravity));
-        tr.addView(createCell(root, pm25, pm25Category.color, gravity));
-        tr.addView(createCell(root, pm10aqi, pm10Category.color, gravity));
-        tr.addView(createCell(root, pm10, pm10Category.color, gravity));
+        tr.addView(createCell(root, pm25aqi, ContextCompat.getColor(getContext(), pm25Category.color), gravity));
+        tr.addView(createCell(root, pm25, ContextCompat.getColor(getContext(), pm25Category.color), gravity));
+        tr.addView(createCell(root, pm10aqi, ContextCompat.getColor(getContext(), pm10Category.color), gravity));
+        tr.addView(createCell(root, pm10, ContextCompat.getColor(getContext(), pm10Category.color), gravity));
 
         if(location) {
             tr.addView(createMapsLocation(root, latitude, longitude));
@@ -181,7 +181,7 @@ public class HistoryFragment extends Fragment {
         tv.setPadding(10, 10, 10, 10);
         tv.setText("show");
         tv.setGravity(Gravity.CENTER);
-        tv.setTextColor(ContextCompat.getColor(getContext(), R.color.purple_500));
+        tv.setTextColor(ContextCompat.getColor(getContext(), R.color.map_link));
 
         tv.setOnClickListener(new View.OnClickListener() {
             @Override
