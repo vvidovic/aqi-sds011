@@ -84,7 +84,9 @@ public class SettingsFragment extends Fragment {
                     saveButtonColorHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            buttonSave.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.primary));
+                            if(buttonSave.isInLayout()) {
+                                buttonSave.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.primary));
+                            }
                         }
                     }, 1000);
 
