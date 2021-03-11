@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +17,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -76,12 +79,14 @@ public class SettingsFragment extends Fragment {
                     editor.putInt(getString(R.string.settings_location_priority_key), locationPriority);
                     editor.commit();
 
-                    new AlertDialog.Builder(getContext())
-                            .setTitle("Saved")
-                            .setMessage("Settings saved.")
-                            .setIcon(R.drawable.ic_baseline_info_24)
-                            .setPositiveButton("OK", null)
-                            .show();
+                    buttonSave.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.green));
+                    Handler saveButtonColorHandler = new Handler(Looper.getMainLooper());
+                    saveButtonColorHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            buttonSave.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.primary));
+                        }
+                    }, 1000);
 
                 }
                 catch (NumberFormatException e) {
