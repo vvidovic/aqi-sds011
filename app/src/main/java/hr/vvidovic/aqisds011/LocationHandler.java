@@ -55,14 +55,22 @@ public class LocationHandler {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
     }
 
-    public boolean updateLocationRequestSettings(int locationPriority) {
+    public boolean updateLocationRequestSettings(final int locationPriority) {
         Log.i(getClass().getSimpleName(), "setLocationPriority()");
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(locationPriority);
-        // We want to receive location updates as often as we write measurements in the
-        // continuous mode.
-        // (sensor sends measurement each second: number of measurements * seconds)
-        long locationUpdateMillis = model.getWorkContinuousAverageCount() * 1000L;
+        // We want to receive location updates as often as we write measurements:
+        // - in the continuous mode: number of measurements to average
+        //   (sensor sends measurements each second: number of measurements * seconds)
+        // - in the periodic mode: number of minutes
+        //   (sensor sends measurements every x minutes)
+        final long locationUpdateMillis;
+        if(model.isWorkPeriodic()) {
+            locationUpdateMillis = model.getWorkPeriodMinutes() * 60 * 1000L;
+        }
+        else {
+            locationUpdateMillis = model.getWorkContinuousAverageCount() * 1000L;
+        }
         locationRequest.setInterval(locationUpdateMillis);
         LocationSettingsRequest.Builder builder =
                 new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
