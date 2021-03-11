@@ -2,7 +2,7 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="gray">#DDDDDDDD</color>
+    <color name="gray">#77777777</color>
 
     <!-- https://material.io/resources/color/#!/?view.left=0&view.right=0&primary.color=1E88E5&secondary.color=43A047 -->
     <!-- blue_600, green_600, red_600 -->
