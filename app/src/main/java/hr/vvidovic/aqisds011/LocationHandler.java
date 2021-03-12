@@ -25,7 +25,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 public class LocationHandler {
-    public static final int LOCATION_DISABLED = 0;
+    public static final int LOCATION_DISABLED = LocationRequest.PRIORITY_NO_POWER;
 
     public static LocationHandler instance = new LocationHandler();
     private static int requestPermCode = 1;
