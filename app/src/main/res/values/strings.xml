@@ -11,6 +11,9 @@
     <string name="button_history_clear">Delete</string>
     <string name="button_history_export">Export</string>
 
+    <string name="msg_settings_save_success">Settings successfully saved.</string>
+    <string name="msg_history_delete_success">History successfully cleared.</string>
+
     <string name="settings_work_period_key">work_period</string>
     <string name="settings_work_periodic_key">work_periodic</string>
     <string name="settings_work_continuous_avg_cnt_key">work_cont_avg_cnt</string>

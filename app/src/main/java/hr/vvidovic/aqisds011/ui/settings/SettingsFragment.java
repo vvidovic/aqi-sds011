@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -79,17 +80,7 @@ public class SettingsFragment extends Fragment {
                     editor.putInt(getString(R.string.settings_location_priority_key), locationPriority);
                     editor.commit();
 
-                    buttonSave.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.green));
-                    Handler saveButtonColorHandler = new Handler(Looper.getMainLooper());
-                    saveButtonColorHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(buttonSave.isShown()) {
-                                buttonSave.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.primary));
-                            }
-                        }
-                    }, 1000);
-
+                    Toast.makeText(getContext(), R.string.msg_settings_save_success, Toast.LENGTH_SHORT).show();
                 }
                 catch (NumberFormatException e) {
                     new AlertDialog.Builder(getContext())

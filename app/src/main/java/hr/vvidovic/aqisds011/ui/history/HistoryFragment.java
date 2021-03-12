@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -75,16 +76,7 @@ public class HistoryFragment extends Fragment {
                             model.getHistory().getValue().clear();
                             model.setHistory(model.getHistory().getValue());
 
-                            buttonClear.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.green));
-                            Handler deleteButtonColorHandler = new Handler(Looper.getMainLooper());
-                            deleteButtonColorHandler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if(buttonClear.isShown()) {
-                                        buttonClear.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.primary));
-                                    }
-                                }
-                            }, 1000);
+                            Toast.makeText(getContext(), R.string.msg_history_delete_success, Toast.LENGTH_SHORT).show();
                         })
                         .setNegativeButton("NO", null)
                         .show();
