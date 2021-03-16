@@ -49,7 +49,7 @@ public class Sds011ViewModel extends ViewModel {
     }
 
     public Measurement postMeasurement(Measurement m) {
-        AqiLog.i(TAG, "postMeasurement(), periodic: " + isWorkPeriodic()
+        AqiLog.i(TAG, "postMeasurement(), periodic: %s", isWorkPeriodic()
                 + ", wc avg cnt: " + getWorkContinuousAverageCount()
                 + ", cm avg hist size: " + continuousMeasurementAvgHist.size());
         postValueMeasurement(m);
@@ -121,7 +121,7 @@ public class Sds011ViewModel extends ViewModel {
     }
 
     private void configureSensorWorkPeriodic(boolean workPeriodic) {
-        AqiLog.i(TAG, "configureSensorWorkPeriodic(" + workPeriodic + ")");
+        AqiLog.i(TAG, "configureSensorWorkPeriodic(%s)", workPeriodic);
         if(workPeriodic) {
             Sds011Handler.instance.setWorkPeriodMinutes(workPeriodMinutes);
         }
@@ -130,34 +130,34 @@ public class Sds011ViewModel extends ViewModel {
         }
     }
     public boolean isWorkPeriodic() {
-        AqiLog.i(TAG, "isWorkPeriodic(): " + workPeriodic);
+        AqiLog.i(TAG, "isWorkPeriodic(): %s", workPeriodic);
         return workPeriodic;
     }
     public void setWorkPeriodic(boolean workPeriodic) {
-        AqiLog.i(TAG, "setWorkPeriodic(" + workPeriodic + ")");
+        AqiLog.i(TAG, "setWorkPeriodic(%s)", workPeriodic);
         this.workPeriodic = workPeriodic;
         configureSensorWorkPeriodic(workPeriodic);
     }
     public Byte getWorkPeriodMinutes() {
-        AqiLog.i(TAG, "getWorkPeriodMinutes(): " + workPeriodMinutes);
+        AqiLog.i(TAG, "getWorkPeriodMinutes(): %s", workPeriodMinutes);
         return workPeriodMinutes;
     }
     public void setWorkPeriodMinutes(byte workPeriodMinutes) {
-        AqiLog.i(TAG, "setWorkPeriodMinutes(" + workPeriodMinutes +")");
+        AqiLog.i(TAG, "setWorkPeriodMinutes(%s)", workPeriodMinutes);
         this.workPeriodMinutes  = workPeriodMinutes;
     }
 
     public int getWorkContinuousAverageCount() {
-        AqiLog.i(TAG, "getWorkContinuousAverageCount(): " + workContinuousAverageCount);
+        AqiLog.i(TAG, "getWorkContinuousAverageCount(): %s", workContinuousAverageCount);
         return workContinuousAverageCount;
     }
     public void setWorkContinuousAverageCount(int workContinuousAverageCount) {
-        AqiLog.i(TAG, "setWorkContinuousAverageCount(" + workContinuousAverageCount + ")");
+        AqiLog.i(TAG, "setWorkContinuousAverageCount(%s)", workContinuousAverageCount);
         this.workContinuousAverageCount = workContinuousAverageCount;
     }
 
     public void setSensorRunningState(boolean startSensor) {
-        AqiLog.i(TAG, "changeSensorState(" + startSensor + ")");
+        AqiLog.i(TAG, "changeSensorState(%s)", startSensor);
         setSensorStarted(startSensor);
         // Update sensor handler workPeriodic value.
         configureSensorWorkPeriodic(workPeriodic);
@@ -190,11 +190,11 @@ public class Sds011ViewModel extends ViewModel {
         }
     }
     public void setSensorStarted(boolean sensorStarted) {
-        AqiLog.i(TAG, "setSensorStarted(" + sensorStarted + ")");
+        AqiLog.i(TAG, "setSensorStarted(%s)", sensorStarted);
         this.sensorStarted = sensorStarted;
     }
     public boolean isSensorStarted() {
-        AqiLog.i(TAG, "isSensorStarted(): " + sensorStarted);
+        AqiLog.i(TAG, "isSensorStarted(): %s", sensorStarted);
         return sensorStarted;
     }
 
@@ -207,20 +207,20 @@ public class Sds011ViewModel extends ViewModel {
         return history;
     }
     public void setLocation(Location location) {
-        AqiLog.i(TAG, "setLocation(" + location + ")");
+        AqiLog.i(TAG, "setLocation(%s)", location);
         this.location = location;
     }
     public Location getLocation() {
-        AqiLog.i(TAG, "getLocation(): " + location);
+        AqiLog.i(TAG, "getLocation(): %s", location);
         return this.location;
     }
 
     public int getLocationPriority() {
-        AqiLog.i(TAG, "getLocationPriority(): " + this.locationPriority);
+        AqiLog.i(TAG, "getLocationPriority(): %s", this.locationPriority);
         return this.locationPriority;
     }
     public void setLocationPriority(int locationPriority) {
-        AqiLog.i(TAG, "setLocationPriority(" + locationPriority + ")");
+        AqiLog.i(TAG, "setLocationPriority(%s)", locationPriority);
         this.locationPriority = locationPriority;
     }
 }

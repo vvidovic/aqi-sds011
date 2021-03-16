@@ -42,10 +42,10 @@ public class LocationHandler {
         public void onLocationResult(@NonNull LocationResult locationResult) {
             super.onLocationResult(locationResult);
             AqiLog.i(TAG,
-                    "onLocationResult(), locationResult: " + locationResult);
+                    "onLocationResult(), locationResult: %s", locationResult);
             if(locationResult != null) {
                 model.setLocation(locationResult.getLastLocation());
-                model.postMsg("new location: " + locationResult.getLastLocation());
+                model.postMsg("new location: %s" + locationResult.getLastLocation());
             }
         }
     };
@@ -115,8 +115,8 @@ public class LocationHandler {
             }
         }
         AqiLog.i(TAG,
-                "setLocationPriority(), task - complete: " +
-                        task.isComplete() + ", success: " + task.isSuccessful());
+                "setLocationPriority(), task - complete: %s, success: %s",
+                task.isComplete(), task.isSuccessful());
 
         if (!task.isComplete()) {
             return false;
@@ -142,11 +142,11 @@ public class LocationHandler {
         String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
         for (String perm: permissions) {
             if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
-                AqiLog.e(TAG, "Permission '" + perm + "' doesn't exist.");
+                AqiLog.e(TAG, "Permission '%s' doesn't exist.", perm);
                 activity.requestPermissions(new String[]{ perm }, AqiRequest.CODE_PERMISSION.val());
             }
             else {
-                AqiLog.i(TAG, "Permission '" + perm + "' granted.");
+                AqiLog.i(TAG, "Permission '%s' granted.", perm);
             }
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -162,7 +162,7 @@ public class LocationHandler {
         locationTask.addOnSuccessListener(activity, new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
-                        AqiLog.i(TAG, "onSuccess(), location: " + location);
+                        AqiLog.i(TAG, "onSuccess(), location: %s", location);
                         // Got last known location. In some rare situations this can be null.
                         if (location != null) {
                             // Logic to handle location object
@@ -172,12 +172,12 @@ public class LocationHandler {
                 }).addOnCompleteListener(activity, new OnCompleteListener<Location>() {
             @Override
             public void onComplete(@NonNull Task<Location> task) {
-                AqiLog.i(TAG, "onComplete(), task: " + task);
+                AqiLog.i(TAG, "onComplete(), task: %s", task);
             }
         }).addOnFailureListener(activity, new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                AqiLog.i(TAG, "onFailure(), e: " + e);
+                AqiLog.i(TAG, "onFailure(), e: %s", e);
             }
         }).addOnCanceledListener(activity, new OnCanceledListener() {
             @Override

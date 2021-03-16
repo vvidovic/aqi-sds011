@@ -161,7 +161,7 @@ public class HistoryFragment extends Fragment {
         // Add data
         for (Measurement m: model.getHistory().getValue()) {
             tl.addView(createRow(root, m));
-            AqiLog.i(TAG, m.toString());
+            AqiLog.d(TAG, m.toString());
         }
 
     }
@@ -237,7 +237,7 @@ public class HistoryFragment extends Fragment {
         tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AqiLog.e(TAG, latitude + "/" + longitude);
+                AqiLog.e(TAG, "%s/%s", latitude, longitude);
 
                 Uri mapsIntentUri = Uri.parse(
                         String.format("geo:0,0?q=%s,%s(%s)",

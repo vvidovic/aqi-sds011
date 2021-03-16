@@ -37,7 +37,7 @@ public class SettingsFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        AqiLog.i(TAG, "onCreateView(), savedInstanceState: " + savedInstanceState);
+        AqiLog.i(TAG, "onCreateView(), savedInstanceState: %s", savedInstanceState);
         model = new ViewModelProvider(requireActivity()).get(Sds011ViewModel.class);
         View root = inflater.inflate(R.layout.fragment_settings, container, false);
 
@@ -129,7 +129,7 @@ public class SettingsFragment extends Fragment {
             locationPriority = LocationHandler.LOCATION_DISABLED;
             locationSetOk = true;
         }
-        AqiLog.i(TAG, "locationSetOk: " + locationSetOk);
+        AqiLog.i(TAG, "locationSetOk: %s", locationSetOk);
 
         if(locationPriority != LocationHandler.LOCATION_DISABLED) {
             LocationHandler.instance.updateLocationLastLocation();

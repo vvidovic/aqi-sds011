@@ -41,8 +41,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.e("aaaaaaaaaaaa", "heeeeeeelooooo");
-        AqiLog.i(TAG, "onCreate(), savedInstanceState: " + savedInstanceState);
+        AqiLog.i(TAG, "onCreate(), savedInstanceState: %s", savedInstanceState);
 
         model = new ViewModelProvider(this).get(Sds011ViewModel.class);
 

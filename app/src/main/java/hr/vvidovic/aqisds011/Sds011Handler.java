@@ -91,11 +91,11 @@ public class Sds011Handler {
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void initUsb(Activity activity) {
-        AqiLog.i(TAG, "initUsb()");
+        AqiLog.d(TAG, "initUsb()");
         usbManager = (UsbManager) activity.getSystemService(Context.USB_SERVICE);
 
         UsbDevice device = activity.getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
-        AqiLog.i(TAG, "device: " + device);
+        AqiLog.d(TAG, "device: %s", device);
         if (device != null) {
             // Device was attached, no need to ask for permissions
             connect(device);
@@ -118,7 +118,7 @@ public class Sds011Handler {
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
 
         public void onReceive(Context context, Intent intent) {
-            AqiLog.i(TAG, "BroadcastReceiver() onReceive(), intent: " + intent);
+            AqiLog.i(TAG, "BroadcastReceiver() onReceive(), intent: %s", intent);
             String action = intent.getAction();
             if (ACTION_USB_PERMISSION.equals(action)) {
                 synchronized (this) {
@@ -129,7 +129,7 @@ public class Sds011Handler {
                         }
                     }
                     else {
-                        AqiLog.d(TAG, "permission denied for device " + device);
+                        AqiLog.d(TAG, "permission denied for device %s", device);
                     }
                 }
             }
@@ -211,7 +211,7 @@ public class Sds011Handler {
     PM10 data content: PM10 (ug/m3) = ((PM10 high byte*256 ) + PM10 low byte)/10
     */
     public void connect(UsbDevice device) {
-        AqiLog.i(TAG, "connect(), sensor started: " + model.isSensorStarted());
+        AqiLog.i(TAG, "connect(), sensor started: %s", model.isSensorStarted());
 
         try {
             UsbDeviceConnection usbConnection = usbManager.openDevice(device);
