@@ -24,7 +24,11 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import hr.vvidovic.aqisds011.log.AqiLog;
+
 public class LocationHandler {
+    private static final String TAG = LocationHandler.class.getSimpleName();
+
     public static final int LOCATION_DISABLED = LocationRequest.PRIORITY_NO_POWER;
     public static LocationHandler instance = new LocationHandler();
     private static long SEC = 1000L;
@@ -37,7 +41,7 @@ public class LocationHandler {
         @Override
         public void onLocationResult(@NonNull LocationResult locationResult) {
             super.onLocationResult(locationResult);
-            Log.i(getClass().getSimpleName(),
+            AqiLog.i(TAG,
                     "onLocationResult(), locationResult: " + locationResult);
             if(locationResult != null) {
                 model.setLocation(locationResult.getLastLocation());
@@ -48,7 +52,7 @@ public class LocationHandler {
 
 
     public void init(Activity activity, Sds011ViewModel model) {
-        Log.i(getClass().getSimpleName(), "init()");
+        AqiLog.i(TAG, "init()");
         this.activity = activity;
         this.model = model;
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
@@ -78,7 +82,7 @@ public class LocationHandler {
     }
 
     public boolean updateLocationRequestSettings(final int locationPriority) {
-        Log.i(getClass().getSimpleName(), "setLocationPriority()");
+        AqiLog.i(TAG, "setLocationPriority()");
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(locationPriority);
         // How often we save measurements:
@@ -103,14 +107,14 @@ public class LocationHandler {
         Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
         long startTime = System.currentTimeMillis();
         while (!task.isComplete() && System.currentTimeMillis() - startTime < 2000) {
-            Log.i(getClass().getSimpleName(), "setLocationPriority(), waiting task to complete...");
+            AqiLog.i(TAG, "setLocationPriority(), waiting task to complete...");
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
-        Log.i(getClass().getSimpleName(),
+        AqiLog.i(TAG,
                 "setLocationPriority(), task - complete: " +
                         task.isComplete() + ", success: " + task.isSuccessful());
 
@@ -134,15 +138,15 @@ public class LocationHandler {
     }
 
     public void updateLocationLastLocation() {
-        Log.i(getClass().getSimpleName(), "updateLocationLastLocation()");
+        AqiLog.i(TAG, "updateLocationLastLocation()");
         String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
         for (String perm: permissions) {
             if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
-                Log.e(getClass().getSimpleName(), "Permission '" + perm + "' doesn't exist.");
+                AqiLog.e(TAG, "Permission '" + perm + "' doesn't exist.");
                 activity.requestPermissions(new String[]{ perm }, AqiRequest.CODE_PERMISSION.val());
             }
             else {
-                Log.i(getClass().getSimpleName(), "Permission '" + perm + "' granted.");
+                AqiLog.i(TAG, "Permission '" + perm + "' granted.");
             }
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -158,7 +162,7 @@ public class LocationHandler {
         locationTask.addOnSuccessListener(activity, new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
-                        Log.i(getClass().getSimpleName(), "onSuccess(), location: " + location);
+                        AqiLog.i(TAG, "onSuccess(), location: " + location);
                         // Got last known location. In some rare situations this can be null.
                         if (location != null) {
                             // Logic to handle location object
@@ -168,17 +172,17 @@ public class LocationHandler {
                 }).addOnCompleteListener(activity, new OnCompleteListener<Location>() {
             @Override
             public void onComplete(@NonNull Task<Location> task) {
-                Log.i(getClass().getSimpleName(), "onComplete(), task: " + task);
+                AqiLog.i(TAG, "onComplete(), task: " + task);
             }
         }).addOnFailureListener(activity, new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Log.i(getClass().getSimpleName(), "onFailure(), e: " + e);
+                AqiLog.i(TAG, "onFailure(), e: " + e);
             }
         }).addOnCanceledListener(activity, new OnCanceledListener() {
             @Override
             public void onCanceled() {
-                Log.i(getClass().getSimpleName(), "onCanceled()");
+                AqiLog.i(TAG, "onCanceled()");
             }
         });
     }

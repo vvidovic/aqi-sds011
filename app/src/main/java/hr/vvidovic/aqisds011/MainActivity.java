@@ -29,8 +29,11 @@ import java.util.List;
 
 import hr.vvidovic.aqisds011.data.AppDatabase;
 import hr.vvidovic.aqisds011.data.Measurement;
+import hr.vvidovic.aqisds011.log.AqiLog;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = MainActivity.class.getSimpleName();
+
     private Sds011ViewModel model;
 
     private AppDatabase db;
@@ -38,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(getClass().getSimpleName(), "onCreate(), savedInstanceState: " + savedInstanceState);
+        Log.e("aaaaaaaaaaaa", "heeeeeeelooooo");
+        AqiLog.i(TAG, "onCreate(), savedInstanceState: " + savedInstanceState);
 
         model = new ViewModelProvider(this).get(Sds011ViewModel.class);
 
@@ -82,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         Sds011Handler.instance.init(this, model, db);
 
         LocationHandler.instance.init(this, model);
-        Log.i(getClass().getSimpleName(), "Before checking location...");
+        AqiLog.i(TAG, "Before checking location...");
         LocationHandler.instance.updateLocationRequestSettings(model.getLocationPriority());
         LocationHandler.instance.updateLocationLastLocation();
 
@@ -93,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i(getClass().getSimpleName(), "onDestroy()");
+        AqiLog.i(TAG, "onDestroy()");
 
         SharedPreferences prefs = this.getPreferences(Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();

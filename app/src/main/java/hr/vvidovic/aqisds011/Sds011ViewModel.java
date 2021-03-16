@@ -11,8 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hr.vvidovic.aqisds011.data.Measurement;
+import hr.vvidovic.aqisds011.log.AqiLog;
 
 public class Sds011ViewModel extends ViewModel {
+    private static final String TAG = Sds011ViewModel.class.getSimpleName();
+
     public static final byte DEFAULT_WP_MINUTES = (byte)2;
     public static final boolean DEFAULT_WP = false;
     public static final int DEFAULT_WC_CNT = 30;
@@ -35,7 +38,7 @@ public class Sds011ViewModel extends ViewModel {
     private int locationPriority;
 
     public Sds011ViewModel() {
-        Log.i(getClass().getSimpleName(), "Sds011ViewModel()");
+        AqiLog.i(TAG, "Sds011ViewModel()");
 
         valueMeasurement.setValue(new Measurement());
         valueMsg.setValue("");
@@ -46,7 +49,7 @@ public class Sds011ViewModel extends ViewModel {
     }
 
     public Measurement postMeasurement(Measurement m) {
-        Log.i(getClass().getSimpleName(), "postMeasurement(), periodic: " + isWorkPeriodic()
+        AqiLog.i(TAG, "postMeasurement(), periodic: " + isWorkPeriodic()
                 + ", wc avg cnt: " + getWorkContinuousAverageCount()
                 + ", cm avg hist size: " + continuousMeasurementAvgHist.size());
         postValueMeasurement(m);
@@ -87,38 +90,38 @@ public class Sds011ViewModel extends ViewModel {
     }
 
     public void postMsg(String msg) {
-        Log.i(getClass().getSimpleName(), "postMsg()");
+        AqiLog.i(TAG, "postMsg()");
 
         valueMsg.postValue(msg);
     }
 
     public void postStatus(String status) {
-        Log.i(getClass().getSimpleName(), "postStatus()");
+        AqiLog.i(TAG, "postStatus()");
         valueStatus.postValue(status);
     }
 
     public LiveData<Measurement> getValueMeasurement() {
-        Log.i(getClass().getSimpleName(), "getValueMeasurement()");
+        AqiLog.i(TAG, "getValueMeasurement()");
         return valueMeasurement;
     }
     private void postValueMeasurement(Measurement value) {
-        Log.i(getClass().getSimpleName(), "postValueMeasurement()");
+        AqiLog.i(TAG, "postValueMeasurement()");
         valueMeasurement.postValue(value);
     }
 
 
     public LiveData<String> getValueMsg() {
-        Log.i(getClass().getSimpleName(), "getValueMsg()");
+        AqiLog.i(TAG, "getValueMsg()");
         return valueMsg;
     }
 
     public LiveData<String> getValueStatus() {
-        Log.i(getClass().getSimpleName(), "getValueStatus()");
+        AqiLog.i(TAG, "getValueStatus()");
         return valueStatus;
     }
 
     private void configureSensorWorkPeriodic(boolean workPeriodic) {
-        Log.i(getClass().getSimpleName(), "configureSensorWorkPeriodic(" + workPeriodic + ")");
+        AqiLog.i(TAG, "configureSensorWorkPeriodic(" + workPeriodic + ")");
         if(workPeriodic) {
             Sds011Handler.instance.setWorkPeriodMinutes(workPeriodMinutes);
         }
@@ -127,34 +130,34 @@ public class Sds011ViewModel extends ViewModel {
         }
     }
     public boolean isWorkPeriodic() {
-        Log.i(getClass().getSimpleName(), "isWorkPeriodic(): " + workPeriodic);
+        AqiLog.i(TAG, "isWorkPeriodic(): " + workPeriodic);
         return workPeriodic;
     }
     public void setWorkPeriodic(boolean workPeriodic) {
-        Log.i(getClass().getSimpleName(), "setWorkPeriodic(" + workPeriodic + ")");
+        AqiLog.i(TAG, "setWorkPeriodic(" + workPeriodic + ")");
         this.workPeriodic = workPeriodic;
         configureSensorWorkPeriodic(workPeriodic);
     }
     public Byte getWorkPeriodMinutes() {
-        Log.i(getClass().getSimpleName(), "getWorkPeriodMinutes(): " + workPeriodMinutes);
+        AqiLog.i(TAG, "getWorkPeriodMinutes(): " + workPeriodMinutes);
         return workPeriodMinutes;
     }
     public void setWorkPeriodMinutes(byte workPeriodMinutes) {
-        Log.i(getClass().getSimpleName(), "setWorkPeriodMinutes(" + workPeriodMinutes +")");
+        AqiLog.i(TAG, "setWorkPeriodMinutes(" + workPeriodMinutes +")");
         this.workPeriodMinutes  = workPeriodMinutes;
     }
 
     public int getWorkContinuousAverageCount() {
-        Log.i(getClass().getSimpleName(), "getWorkContinuousAverageCount(): " + workContinuousAverageCount);
+        AqiLog.i(TAG, "getWorkContinuousAverageCount(): " + workContinuousAverageCount);
         return workContinuousAverageCount;
     }
     public void setWorkContinuousAverageCount(int workContinuousAverageCount) {
-        Log.i(getClass().getSimpleName(), "setWorkContinuousAverageCount(" + workContinuousAverageCount + ")");
+        AqiLog.i(TAG, "setWorkContinuousAverageCount(" + workContinuousAverageCount + ")");
         this.workContinuousAverageCount = workContinuousAverageCount;
     }
 
     public void setSensorRunningState(boolean startSensor) {
-        Log.i(getClass().getSimpleName(), "changeSensorState(" + startSensor + ")");
+        AqiLog.i(TAG, "changeSensorState(" + startSensor + ")");
         setSensorStarted(startSensor);
         // Update sensor handler workPeriodic value.
         configureSensorWorkPeriodic(workPeriodic);
@@ -187,37 +190,37 @@ public class Sds011ViewModel extends ViewModel {
         }
     }
     public void setSensorStarted(boolean sensorStarted) {
-        Log.i(getClass().getSimpleName(), "setSensorStarted(" + sensorStarted + ")");
+        AqiLog.i(TAG, "setSensorStarted(" + sensorStarted + ")");
         this.sensorStarted = sensorStarted;
     }
     public boolean isSensorStarted() {
-        Log.i(getClass().getSimpleName(), "isSensorStarted(): " + sensorStarted);
+        AqiLog.i(TAG, "isSensorStarted(): " + sensorStarted);
         return sensorStarted;
     }
 
     public void setHistory(List<Measurement> history) {
-        Log.i(getClass().getSimpleName(), "setHistory()");
+        AqiLog.i(TAG, "setHistory()");
         this.history.postValue(history);
     }
     public MutableLiveData<List<Measurement>> getHistory() {
-        Log.i(getClass().getSimpleName(), "getHistory()");
+        AqiLog.i(TAG, "getHistory()");
         return history;
     }
     public void setLocation(Location location) {
-        Log.i(getClass().getSimpleName(), "setLocation(" + location + ")");
+        AqiLog.i(TAG, "setLocation(" + location + ")");
         this.location = location;
     }
     public Location getLocation() {
-        Log.i(getClass().getSimpleName(), "getLocation(): " + location);
+        AqiLog.i(TAG, "getLocation(): " + location);
         return this.location;
     }
 
     public int getLocationPriority() {
-        Log.i(getClass().getSimpleName(), "getLocationPriority(): " + this.locationPriority);
+        AqiLog.i(TAG, "getLocationPriority(): " + this.locationPriority);
         return this.locationPriority;
     }
     public void setLocationPriority(int locationPriority) {
-        Log.i(getClass().getSimpleName(), "setLocationPriority(" + locationPriority + ")");
+        AqiLog.i(TAG, "setLocationPriority(" + locationPriority + ")");
         this.locationPriority = locationPriority;
     }
 }

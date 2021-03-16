@@ -27,14 +27,17 @@ import com.google.android.gms.location.LocationRequest;
 import hr.vvidovic.aqisds011.LocationHandler;
 import hr.vvidovic.aqisds011.R;
 import hr.vvidovic.aqisds011.Sds011ViewModel;
+import hr.vvidovic.aqisds011.log.AqiLog;
+import hr.vvidovic.aqisds011.ui.measure.MeasureFragment;
 
 public class SettingsFragment extends Fragment {
+    private static final String TAG = SettingsFragment.class.getSimpleName();
 
     private Sds011ViewModel model;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        Log.i(getClass().getSimpleName(), "onCreateView(), savedInstanceState: " + savedInstanceState);
+        AqiLog.i(TAG, "onCreateView(), savedInstanceState: " + savedInstanceState);
         model = new ViewModelProvider(requireActivity()).get(Sds011ViewModel.class);
         View root = inflater.inflate(R.layout.fragment_settings, container, false);
 
@@ -108,7 +111,7 @@ public class SettingsFragment extends Fragment {
     }
 
     private int getLocationPriority(Spinner spinner) {
-        Log.i(getClass().getSimpleName(), "getLocationPriority()");
+        AqiLog.i(TAG, "getLocationPriority()");
 
         String loc = spinner.getSelectedItem().toString();
 
@@ -126,7 +129,7 @@ public class SettingsFragment extends Fragment {
             locationPriority = LocationHandler.LOCATION_DISABLED;
             locationSetOk = true;
         }
-        Log.i(getClass().getSimpleName(), "locationSetOk: " + locationSetOk);
+        AqiLog.i(TAG, "locationSetOk: " + locationSetOk);
 
         if(locationPriority != LocationHandler.LOCATION_DISABLED) {
             LocationHandler.instance.updateLocationLastLocation();

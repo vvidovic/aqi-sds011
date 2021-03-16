@@ -22,8 +22,11 @@ import java.util.Arrays;
 
 import hr.vvidovic.aqisds011.data.AppDatabase;
 import hr.vvidovic.aqisds011.data.Measurement;
+import hr.vvidovic.aqisds011.log.AqiLog;
 
 public class Sds011Handler {
+    private static final String TAG = Sds011Handler.class.getSimpleName();
+
     public static final Sds011Handler instance = new Sds011Handler();
 
     private static final String ACTION_USB_PERMISSION = "com.android.example.USB_PERMISSION";
@@ -61,14 +64,14 @@ public class Sds011Handler {
     private byte workPeriodReportedMinutes = 0;
 
     public void init(Activity activity, Sds011ViewModel model, AppDatabase db) {
-        Log.i(getClass().getSimpleName(), "init()");
+        AqiLog.i(TAG, "init()");
         this.model = model;
         this.db = db;
         initUsb(activity);
     }
 
     public boolean start() {
-        Log.i(getClass().getSimpleName(), "start()");
+        AqiLog.i(TAG, "start()");
         if(serial != null) {
             serial.write(constructCommand(CMD_SLEEP, MODE_SET, SLEEP_NOT));
 
@@ -78,7 +81,7 @@ public class Sds011Handler {
     }
 
     public boolean stop() {
-        Log.i(getClass().getSimpleName(), "stop()");
+        AqiLog.i(TAG, "stop()");
         if(serial != null) {
             serial.write(constructCommand(CMD_SLEEP, MODE_SET, SLEEP_YES));
             return true;
@@ -88,11 +91,11 @@ public class Sds011Handler {
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void initUsb(Activity activity) {
-        Log.i(getClass().getSimpleName(), "initUsb()");
+        AqiLog.i(TAG, "initUsb()");
         usbManager = (UsbManager) activity.getSystemService(Context.USB_SERVICE);
 
         UsbDevice device = activity.getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
-        Log.i(getClass().getSimpleName(), "device: " + device);
+        AqiLog.i(TAG, "device: " + device);
         if (device != null) {
             // Device was attached, no need to ask for permissions
             connect(device);
@@ -115,7 +118,7 @@ public class Sds011Handler {
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
 
         public void onReceive(Context context, Intent intent) {
-            Log.i(getClass().getSimpleName(), "BroadcastReceiver() onReceive(), intent: " + intent);
+            AqiLog.i(TAG, "BroadcastReceiver() onReceive(), intent: " + intent);
             String action = intent.getAction();
             if (ACTION_USB_PERMISSION.equals(action)) {
                 synchronized (this) {
@@ -126,7 +129,7 @@ public class Sds011Handler {
                         }
                     }
                     else {
-                        Log.d(Sds011Handler.class.getSimpleName(), "permission denied for device " + device);
+                        AqiLog.d(TAG, "permission denied for device " + device);
                     }
                 }
             }
@@ -138,7 +141,7 @@ public class Sds011Handler {
         @Override
         public void onReceivedData(final byte[] b)
         {
-            Log.i(getClass().getSimpleName(), "onReceivedData()");
+            AqiLog.i(TAG, "onReceivedData()");
             if (b.length == 10) {
                 if(b[1] == (byte)0xc0) {
                     model.postMsg("Measuring, wp: " + workPeriodReportedMinutes + " - " + LocalDateTime.now().toString());
@@ -208,7 +211,7 @@ public class Sds011Handler {
     PM10 data content: PM10 (ug/m3) = ((PM10 high byte*256 ) + PM10 low byte)/10
     */
     public void connect(UsbDevice device) {
-        Log.i(getClass().getSimpleName(), "connect(), sensor started: " + model.isSensorStarted());
+        AqiLog.i(TAG, "connect(), sensor started: " + model.isSensorStarted());
 
         try {
             UsbDeviceConnection usbConnection = usbManager.openDevice(device);
@@ -235,7 +238,7 @@ public class Sds011Handler {
     }
 
     private byte[] constructCommand(final byte cmd, final byte cmd2, final byte cmd3) {
-        Log.i(getClass().getSimpleName(), "constructCommand()");
+        AqiLog.i(TAG, "constructCommand()");
         final byte[] command = new byte[19];
         command[0] = (byte)0xaa;  // head
         command[1] = (byte)0xb4;  // command 1
@@ -255,7 +258,7 @@ public class Sds011Handler {
     }
 
     public void setWorkPeriodMinutes(byte workPeriodMinutes) {
-        Log.i(getClass().getSimpleName(), "setWorkPeriodMinutes()");
+        AqiLog.i(TAG, "setWorkPeriodMinutes()");
         this.workPeriodMinutes = workPeriodMinutes;
     }
 }

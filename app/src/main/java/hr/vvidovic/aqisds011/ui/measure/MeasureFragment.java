@@ -24,21 +24,23 @@ import java.util.List;
 import hr.vvidovic.aqisds011.R;
 import hr.vvidovic.aqisds011.Sds011ViewModel;
 import hr.vvidovic.aqisds011.data.Measurement;
+import hr.vvidovic.aqisds011.log.AqiLog;
 
 public class MeasureFragment extends Fragment {
+    private static final String TAG = MeasureFragment.class.getSimpleName();
 
     private Sds011ViewModel model;
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        Log.i(getClass().getSimpleName(), "onActivityCreated()");
+        AqiLog.i(TAG, "onActivityCreated()");
         super.onActivityCreated(savedInstanceState);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        Log.i(getClass().getSimpleName(), "onCreateView()");
+        AqiLog.i(TAG, "onCreateView()");
         model = new ViewModelProvider(requireActivity()).get(Sds011ViewModel.class);
         View root = inflater.inflate(R.layout.fragment_measure, container, false);
 
@@ -124,7 +126,7 @@ public class MeasureFragment extends Fragment {
     }
 
     private void updateButtonsEnabled(View root, boolean started) {
-        Log.i(getClass().getSimpleName(), "updateButtonsEnabled()");
+        AqiLog.i(TAG, "updateButtonsEnabled()");
         ToggleButton tbMode = root.findViewById(R.id.toggle_measure_mode);
         Button btnStart = root.findViewById(R.id.button_measure_start);
         Button btnStop = root.findViewById(R.id.button_measure_stop);

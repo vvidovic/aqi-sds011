@@ -39,8 +39,12 @@ import hr.vvidovic.aqisds011.AqiRequest;
 import hr.vvidovic.aqisds011.Sds011ViewModel;
 import hr.vvidovic.aqisds011.data.AppDatabase;
 import hr.vvidovic.aqisds011.data.Measurement;
+import hr.vvidovic.aqisds011.log.AqiLog;
+import hr.vvidovic.aqisds011.ui.measure.MeasureFragment;
 
 public class HistoryFragment extends Fragment {
+    private static final String TAG = HistoryFragment.class.getSimpleName();
+
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private Sds011ViewModel model;
@@ -157,7 +161,7 @@ public class HistoryFragment extends Fragment {
         // Add data
         for (Measurement m: model.getHistory().getValue()) {
             tl.addView(createRow(root, m));
-            Log.i(getClass().getSimpleName(), m.toString());
+            AqiLog.i(TAG, m.toString());
         }
 
     }
@@ -233,7 +237,7 @@ public class HistoryFragment extends Fragment {
         tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.e(getClass().getSimpleName(), latitude + "/" + longitude);
+                AqiLog.e(TAG, latitude + "/" + longitude);
 
                 Uri mapsIntentUri = Uri.parse(
                         String.format("geo:0,0?q=%s,%s(%s)",
