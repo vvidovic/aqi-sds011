@@ -108,7 +108,7 @@ public class SettingsFragment extends Fragment {
     }
 
     private int getLocationPriority(Spinner spinner) {
-        Log.i(getTag(), "getLocationPriority()");
+        Log.i(getClass().getSimpleName(), "getLocationPriority()");
 
         String loc = spinner.getSelectedItem().toString();
 
@@ -126,7 +126,7 @@ public class SettingsFragment extends Fragment {
             locationPriority = LocationHandler.LOCATION_DISABLED;
             locationSetOk = true;
         }
-        Log.i(getTag(), "locationSetOk: " + locationSetOk);
+        Log.i(getClass().getSimpleName(), "locationSetOk: " + locationSetOk);
 
         if(locationPriority != LocationHandler.LOCATION_DISABLED) {
             LocationHandler.instance.updateLocationLastLocation();
