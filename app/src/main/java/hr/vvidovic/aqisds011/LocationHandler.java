@@ -26,9 +26,8 @@ import com.google.android.gms.tasks.Task;
 
 public class LocationHandler {
     public static final int LOCATION_DISABLED = LocationRequest.PRIORITY_NO_POWER;
-
     public static LocationHandler instance = new LocationHandler();
-    private static int requestPermCode = 1;
+    private static long SEC = 1000L;
 
     private Activity activity;
     private Sds011ViewModel model;
@@ -55,22 +54,48 @@ public class LocationHandler {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
     }
 
+    // We want to receive location updates dependant on how often we save measurements (sm):
+    // - sm <= 10 sec: 10 sec
+    // - 10 < sm <= 50 sec: 10 + (sm - 10) / 2
+    // - 50 < sm <= 140 sec: 30 + (sm - 30) / 3
+    // - 140 < sm: 60 sec
+    long calculateLocationUpdateInterval(final long saveMeasurementIntervalMillis) {
+        final long locationUpdateMillis;
+        if(saveMeasurementIntervalMillis <= 10 * SEC) {
+            locationUpdateMillis = 10 * SEC;
+        }
+        else if(saveMeasurementIntervalMillis <= 50 * SEC) {
+            locationUpdateMillis = 10 * SEC + (saveMeasurementIntervalMillis - 10 * SEC) / 2;
+        }
+        else if(saveMeasurementIntervalMillis <= 140 * SEC) {
+            locationUpdateMillis = 30 * SEC + (saveMeasurementIntervalMillis - 50 * SEC) / 3;
+        }
+        else {
+            locationUpdateMillis = 60 * SEC;
+        }
+
+        return locationUpdateMillis;
+    }
+
     public boolean updateLocationRequestSettings(final int locationPriority) {
         Log.i(getClass().getSimpleName(), "setLocationPriority()");
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(locationPriority);
-        // We want to receive location updates as often as we write measurements:
-        // - in the continuous mode: number of measurements to average
-        //   (sensor sends measurements each second: number of measurements * seconds)
-        // - in the periodic mode: number of minutes
-        //   (sensor sends measurements every x minutes)
-        final long locationUpdateMillis;
+        // How often we save measurements:
+        // - in the continuous mode sensor sends measurement each second:
+        //   number of measurements * seconds
+        // - in the periodic mode sensor sends measurement every n minutes:
+        //   number of minutes
+        final long saveMeasurementIntervalMillis;
         if(model.isWorkPeriodic()) {
-            locationUpdateMillis = model.getWorkPeriodMinutes() * 60 * 1000L;
+            saveMeasurementIntervalMillis = model.getWorkPeriodMinutes() * 60 * SEC;
         }
         else {
-            locationUpdateMillis = model.getWorkContinuousAverageCount() * 1000L;
+            saveMeasurementIntervalMillis = model.getWorkContinuousAverageCount() * SEC;
         }
+        final long locationUpdateMillis =
+                calculateLocationUpdateInterval(saveMeasurementIntervalMillis);
+
         locationRequest.setInterval(locationUpdateMillis);
         LocationSettingsRequest.Builder builder =
                 new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
@@ -114,7 +139,7 @@ public class LocationHandler {
         for (String perm: permissions) {
             if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
                 Log.e(getClass().getSimpleName(), "Permission '" + perm + "' doesn't exist.");
-                activity.requestPermissions(new String[]{ perm }, requestPermCode);
+                activity.requestPermissions(new String[]{ perm }, AqiRequest.CODE_PERMISSION.val());
             }
             else {
                 Log.i(getClass().getSimpleName(), "Permission '" + perm + "' granted.");
