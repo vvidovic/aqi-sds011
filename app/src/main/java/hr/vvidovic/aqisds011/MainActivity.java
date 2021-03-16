@@ -31,7 +31,6 @@ import hr.vvidovic.aqisds011.data.AppDatabase;
 import hr.vvidovic.aqisds011.data.Measurement;
 
 public class MainActivity extends AppCompatActivity {
-
     private Sds011ViewModel model;
 
     private AppDatabase db;

@@ -115,7 +115,7 @@ public class Sds011Handler {
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
 
         public void onReceive(Context context, Intent intent) {
-            Log.i(getClass().getSimpleName(), "BroadcastReceiver() onReceive()");
+            Log.i(getClass().getSimpleName(), "BroadcastReceiver() onReceive(), intent: " + intent);
             String action = intent.getAction();
             if (ACTION_USB_PERMISSION.equals(action)) {
                 synchronized (this) {
