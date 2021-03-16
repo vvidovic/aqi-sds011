@@ -1,14 +1,11 @@
 package hr.vvidovic.aqisds011.ui.history;
 
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
+import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.text.Editable;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -28,14 +25,17 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.room.Room;
 
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 
 import hr.vvidovic.aqisds011.R;
+import hr.vvidovic.aqisds011.AqiRequest;
 import hr.vvidovic.aqisds011.Sds011ViewModel;
 import hr.vvidovic.aqisds011.data.AppDatabase;
 import hr.vvidovic.aqisds011.data.Measurement;
@@ -85,16 +85,64 @@ public class HistoryFragment extends Fragment {
         buttonExport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new AlertDialog.Builder(getContext())
-                        .setTitle("TODO")
-                        .setMessage("Not yet implemented")
-                        .setIcon(R.drawable.ic_baseline_info_24)
-                        .setPositiveButton("OK", null)
-                        .show();
+                askUserToSaveExport();
             }
         });
 
         return root;
+    }
+
+    // Export data happens after user select the destination.
+    @Override
+    public void onActivityResult(final int requestCode, final int resultCode, @Nullable final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == AqiRequest.CREATE_FILE.val() && resultCode == Activity.RESULT_OK) {
+            ContentResolver contentResolver = getContext().getContentResolver();
+            try {
+                OutputStream os = contentResolver.openOutputStream(data.getData());
+                BufferedOutputStream bos = new BufferedOutputStream(os);
+                StringBuilder sbHead = new StringBuilder();
+                sbHead
+                        .append("id").append(',')
+                        .append("dateTime").append(',')
+                        .append("pm25").append(',')
+                        .append("pm10").append(',')
+                        .append("locDateTime").append(',')
+                        .append("locLatitude").append(',')
+                        .append("locLongitude").append(',')
+                        .append("locAccuracy").append('\n');
+                bos.write(sbHead.toString().getBytes());
+
+                for (Measurement m: model.getHistory().getValue()) {
+                    StringBuilder sbRow = new StringBuilder();
+                    sbRow
+                            .append(m.id).append(',')
+                            .append(m.dateTime).append(',')
+                            .append(m.pm25).append(',')
+                            .append(m.pm10).append(',')
+                            .append(m.locDateTime).append(',')
+                            .append(m.locLatitude).append(',')
+                            .append(m.locLongitude).append(',')
+                            .append(m.locAccuracy).append('\n');
+                    bos.write(sbRow.toString().getBytes());
+                }
+                bos.flush();
+                bos.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void askUserToSaveExport() {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("text/csv");
+        String dateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
+        intent.putExtra(Intent.EXTRA_TITLE, String.format("aqi_sds011_%s.csv", dateTime));
+
+        startActivityForResult(intent, AqiRequest.CREATE_FILE.val());
     }
 
     private void refreshTable(View root) {
@@ -109,7 +157,7 @@ public class HistoryFragment extends Fragment {
         // Add data
         for (Measurement m: model.getHistory().getValue()) {
             tl.addView(createRow(root, m));
-            Log.i(getTag(), m.toString());
+            Log.i(getClass().getSimpleName(), m.toString());
         }
 
     }
@@ -185,7 +233,7 @@ public class HistoryFragment extends Fragment {
         tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.e(getTag(), latitude + "/" + longitude);
+                Log.e(getClass().getSimpleName(), latitude + "/" + longitude);
 
                 Uri mapsIntentUri = Uri.parse(
                         String.format("geo:0,0?q=%s,%s(%s)",
