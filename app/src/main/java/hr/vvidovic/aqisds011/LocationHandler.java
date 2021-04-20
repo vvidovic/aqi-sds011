@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Looper;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -45,7 +44,7 @@ public class LocationHandler {
                     "onLocationResult(), locationResult: %s", locationResult);
             if(locationResult != null) {
                 model.setLocation(locationResult.getLastLocation());
-                model.postMsg("new location: %s" + locationResult.getLastLocation());
+                model.postDebugMsg("new location: %s" + locationResult.getLastLocation());
             }
         }
     };

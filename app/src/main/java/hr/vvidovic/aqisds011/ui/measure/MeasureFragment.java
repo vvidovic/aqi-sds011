@@ -1,8 +1,6 @@
 package hr.vvidovic.aqisds011.ui.measure;
 
-import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -94,7 +92,7 @@ public class MeasureFragment extends Fragment {
                 else {
                     lastMeasurement = Instant.ofEpochMilli(history.get(history.size() -1).dateTime).toString();
                 }
-                model.postMsg("last date-time: " + lastMeasurement);
+                model.postDebugMsg("last date-time: " + lastMeasurement);
             }
         });
 
@@ -103,7 +101,7 @@ public class MeasureFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 tbMode.setEnabled(false);
-                model.postMsg("Starting...");
+                model.postDebugMsg("Starting...");
                 model.setSensorRunningState(true);
                 updateButtonsEnabled(root, true);
             }
@@ -114,7 +112,7 @@ public class MeasureFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 tbMode.setEnabled(true);
-                model.postMsg("Stopping...");
+                model.postDebugMsg("Stopping...");
                 model.setSensorRunningState(false);
                 updateButtonsEnabled(root, false);
             }

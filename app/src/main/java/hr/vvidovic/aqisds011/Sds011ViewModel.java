@@ -1,7 +1,6 @@
 package hr.vvidovic.aqisds011;
 
 import android.location.Location;
-import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -15,6 +14,8 @@ import hr.vvidovic.aqisds011.log.AqiLog;
 
 public class Sds011ViewModel extends ViewModel {
     private static final String TAG = Sds011ViewModel.class.getSimpleName();
+
+    private static final boolean SHOW_DEBUG_MESSAGES = false;
 
     public static final byte DEFAULT_WP_MINUTES = (byte)2;
     public static final boolean DEFAULT_WP = false;
@@ -42,7 +43,7 @@ public class Sds011ViewModel extends ViewModel {
 
         valueMeasurement.setValue(new Measurement());
         valueMsg.setValue("");
-        valueStatus.setValue("Stopped.");
+        valueStatus.setValue("");
 
         List<Measurement> h = new ArrayList<>();
         history.setValue(h);
@@ -89,10 +90,12 @@ public class Sds011ViewModel extends ViewModel {
         return newM;
     }
 
-    public void postMsg(String msg) {
-        AqiLog.i(TAG, "postMsg()");
+    public void postDebugMsg(String msg) {
+        AqiLog.i(TAG, "postDebugMsg(), SHOW_DEBUG_MESSAGES: %s", SHOW_DEBUG_MESSAGES);
 
-        valueMsg.postValue(msg);
+        if(SHOW_DEBUG_MESSAGES) {
+            valueMsg.postValue(msg);
+        }
     }
 
     public void postStatus(String status) {
@@ -163,7 +166,7 @@ public class Sds011ViewModel extends ViewModel {
         configureSensorWorkPeriodic(workPeriodic);
         if(startSensor) {
             if(Sds011Handler.instance.start()) {
-                postMsg("Started");
+                postDebugMsg("Started");
                 LocationHandler.instance.startLocationUpdate();
                 if(isWorkPeriodic()) {
                     postStatus("Running in the PERIODIC mode.");
@@ -173,18 +176,18 @@ public class Sds011ViewModel extends ViewModel {
                 }
             }
             else {
-                postMsg("");
+                postDebugMsg("");
                 postStatus("Sensor is not connected.");
             }
         }
         else {
             LocationHandler.instance.stopLocationUpdate();
             if(Sds011Handler.instance.stop()) {
-                postMsg("Stopped");
+                postDebugMsg("Stopped");
                 postStatus("");
             }
             else {
-                postMsg("");
+                postDebugMsg("");
                 postStatus("Sensor is not connected.");
             }
         }
@@ -192,6 +195,12 @@ public class Sds011ViewModel extends ViewModel {
     public void setSensorStarted(boolean sensorStarted) {
         AqiLog.i(TAG, "setSensorStarted(%s)", sensorStarted);
         this.sensorStarted = sensorStarted;
+        if(sensorStarted) {
+            postDebugMsg("Started");
+        }
+        else {
+            postDebugMsg("Stopped");
+        }
     }
     public boolean isSensorStarted() {
         AqiLog.i(TAG, "isSensorStarted(): %s", sensorStarted);

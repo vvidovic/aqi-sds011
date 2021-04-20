@@ -10,7 +10,6 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -144,7 +143,7 @@ public class Sds011Handler {
             AqiLog.i(TAG, "onReceivedData()");
             if (b.length == 10) {
                 if(b[1] == (byte)0xc0) {
-                    model.postMsg("Measuring, wp: " + workPeriodReportedMinutes + " - " + LocalDateTime.now().toString());
+                    model.postDebugMsg("Measuring, wp: " + workPeriodReportedMinutes + " - " + LocalDateTime.now().toString());
                     float pm25 = (256 * Math.abs(b[3]) + Math.abs(b[2])) / 10.0f;
                     float pm10 = (256 * Math.abs(b[5]) + Math.abs(b[4])) / 10.0f;
 
@@ -160,24 +159,24 @@ public class Sds011Handler {
                 else if(b[1] == (byte)0xc5 && b[2] == (byte)6) {
                     switch(b[4]) {
                         case 0:
-                            model.postMsg("Sleeping...");
+                            model.postDebugMsg("Sleeping...");
                             break;
                         case 1:
-                            model.postMsg("Awake...");
+                            model.postDebugMsg("Awake...");
                             serial.write(constructCommand(CMD_WORKING_PERIOD, (byte)1, workPeriodMinutes));
                             break;
                         default:
-                            model.postMsg("err,b[4]!=(0,1): " + Arrays.toString(b));
+                            model.postDebugMsg("err,b[4]!=(0,1): " + Arrays.toString(b));
                     }
                 }
                 // Set working period response
                 else if(b[1] == (byte)0xc5 && b[2] == (byte)8) {
                     workPeriodReportedMinutes = b[4];
-                    model.postMsg("working period: " + (int)workPeriodReportedMinutes);
+                    model.postDebugMsg("working period: " + (int)workPeriodReportedMinutes);
                 }
                 // Set data reporting mode response
                 else if(b[1] == (byte)0xc5 && b[2] == (byte)2) {
-                    model.postMsg("reporting mode: " + (int)b[4]);
+                    model.postDebugMsg("reporting mode: " + (int)b[4]);
                 }
             }
         }
@@ -233,7 +232,7 @@ public class Sds011Handler {
                 serial.write(constructCommand(CMD_SLEEP, MODE_SET, SLEEP_YES));
             }
         } catch (Exception e) {
-            model.postMsg("Error connecting to SDS011: " + e.getLocalizedMessage());
+            model.postDebugMsg("Error connecting to SDS011: " + e.getLocalizedMessage());
         }
     }
 

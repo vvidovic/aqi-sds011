@@ -4,7 +4,7 @@ import android.util.Log;
 
 public class AqiLog {
     // Disable all logging by setting this to Log.ASSERT.
-    private static final int AQI_PRIORITY = Log.VERBOSE;
+    private static final int AQI_PRIORITY = Log.WARN;
 
     public static void d(String tag, String msgFormat, Object ...msgParams) {
         log(Log.DEBUG, tag, msgFormat, msgParams);
