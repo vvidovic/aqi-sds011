@@ -7,31 +7,31 @@ phone using the
 
 ## The sensor (active) mode of work
 
-Application puts sensor in so called active mode (as opposed to
-the query mode).
+The application puts the sensor in so-called active mode (as opposed
+to the query mode).
 
-When in the active mode, sensor sends data to the connected phone
+When in the active mode, the sensor sends data to the connected phone
 without any additional queries using the defined period (which
 can be continuous).
 
-When in the query mode, phone have to ask the sensor to sends
+When in the query mode, the phone has to ask the sensor to sends
 data for each measurement. This mode is not used by aqi-sds011
 application.
 
 ## The application measurement period
 
-Application is implement to work in two modes:
+Application is implemented to work in two modes:
 - continuous
 - periodic
 
-In the continuous mode, application receives new measurement
+In the continuous mode, the application receives new measurement
 each second:
 - new measurement is visible on the "Current data" screen
   each second
 - multiple measurements are averaged and saved to history as
   defined on the "Settings" screen
 
-In the periodic mode, application receives new measurement
+In the periodic mode, the application receives new measurement
 as defined by the work period (minutes):
 - new measurement is visible on the "Current data" screen
   as defined by the "Settings" screen (minutes)
