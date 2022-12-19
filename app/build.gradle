@@ -9,9 +9,9 @@ android {
     defaultConfig {
         applicationId "hr.vvidovic.aqisds011"
         minSdkVersion 26
-        targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 33
+        versionCode 3
+        versionName "1.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

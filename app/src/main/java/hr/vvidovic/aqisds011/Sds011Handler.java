@@ -101,7 +101,8 @@ public class Sds011Handler {
         }
         else {
             // List all devices, find DSS011 by product id and ask for permission
-            PendingIntent permissionIntent = PendingIntent.getBroadcast(activity, 0, new Intent(ACTION_USB_PERMISSION), 0);
+            PendingIntent permissionIntent = PendingIntent.getBroadcast(activity, 0,
+                    new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
             IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
             activity.registerReceiver(usbReceiver, filter);
 
