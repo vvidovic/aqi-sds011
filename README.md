@@ -36,3 +36,14 @@ as defined by the work period (minutes):
 - new measurement is visible on the "Current data" screen
   as defined by the "Settings" screen (minutes)
 - each measurement is saved to history immediately
+
+## How to build an app
+
+App can be built and signed using a `gradle` command-line:
+```bash
+# Bundle is created: ./app/build/outputs/bundle/release/app-release.aab
+./gradlew bundleRelease
+
+# Signing a bundle
+jarsigner -keystore <keystore_path.p12> ./app/build/outputs/bundle/release/app-release.aab <key_alias>
+```

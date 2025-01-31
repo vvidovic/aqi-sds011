@@ -1,5 +1,6 @@
 package hr.vvidovic.aqisds011;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -10,8 +11,6 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
-
-import androidx.annotation.RequiresApi;
 
 import com.felhr.usbserial.UsbSerialDevice;
 import com.felhr.usbserial.UsbSerialInterface;
@@ -88,7 +87,7 @@ public class Sds011Handler {
         return false;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     private void initUsb(Activity activity) {
         AqiLog.d(TAG, "initUsb()");
         usbManager = (UsbManager) activity.getSystemService(Context.USB_SERVICE);
@@ -104,7 +103,12 @@ public class Sds011Handler {
             PendingIntent permissionIntent = PendingIntent.getBroadcast(activity, 0,
                     new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
             IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-            activity.registerReceiver(usbReceiver, filter);
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                activity.registerReceiver(usbReceiver, filter, Context.RECEIVER_EXPORTED);
+            }
+            else {
+                activity.registerReceiver(usbReceiver, filter);
+            }
 
             for (UsbDevice usbDevice : usbManager.getDeviceList().values()) {
                 if (usbDevice.getProductId() == PRODUCT_ID && usbDevice.getVendorId() == VENDOR_ID) {
