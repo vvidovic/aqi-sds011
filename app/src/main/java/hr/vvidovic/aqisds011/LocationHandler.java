@@ -16,6 +16,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -28,7 +29,7 @@ import hr.vvidovic.aqisds011.log.AqiLog;
 public class LocationHandler {
     private static final String TAG = LocationHandler.class.getSimpleName();
 
-    public static final int LOCATION_DISABLED = LocationRequest.PRIORITY_NO_POWER;
+    public static final int LOCATION_DISABLED = Priority.PRIORITY_PASSIVE;
     public static LocationHandler instance = new LocationHandler();
     private static long SEC = 1000L;
 
@@ -82,8 +83,6 @@ public class LocationHandler {
 
     public boolean updateLocationRequestSettings(final int locationPriority) {
         AqiLog.i(TAG, "setLocationPriority()");
-        locationRequest = LocationRequest.create();
-        locationRequest.setPriority(locationPriority);
         // How often we save measurements:
         // - in the continuous mode sensor sends measurement each second:
         //   number of measurements * seconds
@@ -99,7 +98,10 @@ public class LocationHandler {
         final long locationUpdateMillis =
                 calculateLocationUpdateInterval(saveMeasurementIntervalMillis);
 
-        locationRequest.setInterval(locationUpdateMillis);
+        locationRequest = new LocationRequest.Builder(locationUpdateMillis)
+                .setPriority(locationPriority)
+                .build();
+
         LocationSettingsRequest.Builder builder =
                 new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
         SettingsClient client = LocationServices.getSettingsClient(activity);

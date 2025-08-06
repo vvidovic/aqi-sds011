@@ -39,6 +39,8 @@ as defined by the work period (minutes):
 
 ## How to build an app
 
+Increase version in the [./app/build.gradle](./app/build.gradle), for example, from `10` to `11`.
+
 App can be built and signed using a `gradle` command-line:
 ```bash
 # Bundle is created: ./app/build/outputs/bundle/release/app-release.aab

@@ -23,6 +23,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.Priority;
 
 import hr.vvidovic.aqisds011.LocationHandler;
 import hr.vvidovic.aqisds011.R;
@@ -101,9 +102,9 @@ public class SettingsFragment extends Fragment {
 
     private int getLocationSelection() {
         switch (model.getLocationPriority()) {
-            case LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY:
+            case Priority.PRIORITY_BALANCED_POWER_ACCURACY:
                 return 1;
-            case LocationRequest.PRIORITY_HIGH_ACCURACY:
+            case Priority.PRIORITY_HIGH_ACCURACY:
                 return 2;
             default:
                 return 0;
@@ -118,11 +119,11 @@ public class SettingsFragment extends Fragment {
         final boolean locationSetOk;
         final int locationPriority;
         if(loc.equals(getString(R.string.settings_location_high_accuracy))) {
-            locationPriority = LocationRequest.PRIORITY_HIGH_ACCURACY;
+            locationPriority = Priority.PRIORITY_HIGH_ACCURACY;
             locationSetOk = LocationHandler.instance.updateLocationRequestSettings(locationPriority);
         }
         else if(loc.equals(getString(R.string.settings_location_low_power))) {
-            locationPriority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY;
+            locationPriority = Priority.PRIORITY_BALANCED_POWER_ACCURACY;
             locationSetOk = LocationHandler.instance.updateLocationRequestSettings(locationPriority);
         }
         else {
