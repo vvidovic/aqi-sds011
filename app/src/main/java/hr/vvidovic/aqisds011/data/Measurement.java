@@ -13,9 +13,10 @@ import java.time.Instant;
 import hr.vvidovic.aqisds011.R;
 
 /*
-AQI calculation & coloring adapted from:
-https://github.com/zefanja/aqi/blob/master/html/aqi.js
- */
+US EPA AQI breakpoint and interpolation rules based on 40 CFR Part 58, Appendix G.
+The PM2.5 breakpoints reflect the 2024 EPA revision effective May 6, 2024.
+The caller supplies the particulate concentration; this class does not calculate a 24-hour average or NowCast.
+*/
 @Entity
 public class Measurement {
     @PrimaryKey(autoGenerate = true)
@@ -77,11 +78,11 @@ public class Measurement {
     }
 
     public enum Category {
-        brown(300, R.color.brown),
-        purple(200,R.color.purple),
-        red(150,R.color.red),
-        orange(100,R.color.orange),
-        yellow(50, R.color.yellow),
+        brown(301, R.color.brown),
+        purple(201,R.color.purple),
+        red(151,R.color.red),
+        orange(101,R.color.orange),
+        yellow(51, R.color.yellow),
         green(0, R.color.green),
         ;
 
@@ -108,83 +109,60 @@ public class Measurement {
         }
     }
 
+    private static final double[][] PM25_BREAKPOINTS = {
+            {0.0, 9.0, 0, 50},
+            {9.1, 35.4, 51, 100},
+            {35.5, 55.4, 101, 150},
+            {55.5, 125.4, 151, 200},
+            {125.5, 225.4, 201, 300},
+            {225.5, 325.4, 301, 500}
+    };
+
+    private static final double[][] PM10_BREAKPOINTS = {
+            {0, 54, 0, 50},
+            {55, 154, 51, 100},
+            {155, 254, 101, 150},
+            {255, 354, 151, 200},
+            {355, 424, 201, 300},
+            {425, 604, 301, 500}
+    };
+
     private static int calcAQIpm25(float pm25) {
-        double pm1 = 0.0;
-        double pm2 = 12.0;
-        double pm3 = 35.4;
-        double pm4 = 55.4;
-        double pm5 = 150.4;
-        double pm6 = 250.4;
-        double pm7 = 350.4;
-        double pm8 = 500.4;
-
-        double aqi1 = 0.0;
-        double aqi2 = 50.0;
-        double aqi3 = 100.0;
-        double aqi4 = 150.0;
-        double aqi5 = 200.0;
-        double aqi6 = 300.0;
-        double aqi7 = 400.0;
-        double aqi8 = 500.0;
-
-        double aqipm25 = 0.0;
-
-        if (pm25 >= pm1 && pm25 <= pm2) {
-            aqipm25 = ((aqi2 - aqi1) / (pm2 - pm1)) * (pm25 - pm1) + aqi1;
-        } else if (pm25 >= pm2 && pm25 <= pm3) {
-            aqipm25 = ((aqi3 - aqi2) / (pm3 - pm2)) * (pm25 - pm2) + aqi2;
-        } else if (pm25 >= pm3 && pm25 <= pm4) {
-            aqipm25 = ((aqi4 - aqi3) / (pm4 - pm3)) * (pm25 - pm3) + aqi3;
-        } else if (pm25 >= pm4 && pm25 <= pm5) {
-            aqipm25 = ((aqi5 - aqi4) / (pm5 - pm4)) * (pm25 - pm4) + aqi4;
-        } else if (pm25 >= pm5 && pm25 <= pm6) {
-            aqipm25 = ((aqi6 - aqi5) / (pm6 - pm5)) * (pm25 - pm5) + aqi5;
-        } else if (pm25 >= pm6 && pm25 <= pm7) {
-            aqipm25 = ((aqi7 - aqi6) / (pm7 - pm6)) * (pm25 - pm6) + aqi6;
-        } else if (pm25 >= pm7 && pm25 <= pm8) {
-            aqipm25 = ((aqi8 - aqi7) / (pm8 - pm7)) * (pm25 - pm7) + aqi7;
-        }
-
-        return (int)Math.round(aqipm25);
+        // EPA requires PM2.5 concentrations to be truncated to one decimal place.
+        double concentration = truncate(Math.max(0.0, pm25), 10.0);
+        return calculateAqi(concentration, PM25_BREAKPOINTS);
     }
 
     private static int calcAQIpm10(float pm10) {
-        double pm1 = 0.0;
-        double pm2 = 54.0;
-        double pm3 = 154.0;
-        double pm4 = 254.0;
-        double pm5 = 354.0;
-        double pm6 = 424.0;
-        double pm7 = 504.0;
-        double pm8 = 604.0;
+        // EPA requires PM10 concentrations to be truncated to an integer.
+        double concentration = Math.floor(Math.max(0.0, pm10));
+        return calculateAqi(concentration, PM10_BREAKPOINTS);
+    }
 
-        double aqi1 = 0.0;
-        double aqi2 = 50.0;
-        double aqi3 = 100.0;
-        double aqi4 = 150.0;
-        double aqi5 = 200.0;
-        double aqi6 = 300.0;
-        double aqi7 = 400.0;
-        double aqi8 = 500.0;
+    private static double truncate(double value, double scale) {
+        return Math.floor(value * scale) / scale;
+    }
 
-        double aqipm10 = 0.0;
-
-        if (pm10 >= pm1 && pm10 <= pm2) {
-            aqipm10 = ((aqi2 - aqi1) / (pm2 - pm1)) * (pm10 - pm1) + aqi1;
-        } else if (pm10 >= pm2 && pm10 <= pm3) {
-            aqipm10 = ((aqi3 - aqi2) / (pm3 - pm2)) * (pm10 - pm2) + aqi2;
-        } else if (pm10 >= pm3 && pm10 <= pm4) {
-            aqipm10 = ((aqi4 - aqi3) / (pm4 - pm3)) * (pm10 - pm3) + aqi3;
-        } else if (pm10 >= pm4 && pm10 <= pm5) {
-            aqipm10 = ((aqi5 - aqi4) / (pm5 - pm4)) * (pm10 - pm4) + aqi4;
-        } else if (pm10 >= pm5 && pm10 <= pm6) {
-            aqipm10 = ((aqi6 - aqi5) / (pm6 - pm5)) * (pm10 - pm5) + aqi5;
-        } else if (pm10 >= pm6 && pm10 <= pm7) {
-            aqipm10 = ((aqi7 - aqi6) / (pm7 - pm6)) * (pm10 - pm6) + aqi6;
-        } else if (pm10 >= pm7 && pm10 <= pm8) {
-            aqipm10 = ((aqi8 - aqi7) / (pm8 - pm7)) * (pm10 - pm7) + aqi7;
+    private static int calculateAqi(double concentration, double[][] breakpoints) {
+        for (double[] breakpoint : breakpoints) {
+            if (concentration >= breakpoint[0] && concentration <= breakpoint[1]) {
+                return interpolateAqi(concentration, breakpoint);
+            }
         }
-        return (int)Math.round(aqipm10);
+
+        // Appendix G permits concentrations above the highest breakpoint to be
+        // calculated using the last two breakpoints (AQI may therefore exceed 500).
+        return interpolateAqi(concentration, breakpoints[breakpoints.length - 1]);
+    }
+
+    private static int interpolateAqi(double concentration, double[] breakpoint) {
+        double concentrationLow = breakpoint[0];
+        double concentrationHigh = breakpoint[1];
+        double aqiLow = breakpoint[2];
+        double aqiHigh = breakpoint[3];
+        double aqi = ((aqiHigh - aqiLow) / (concentrationHigh - concentrationLow))
+                * (concentration - concentrationLow) + aqiLow;
+        return (int) Math.round(aqi);
     }
 
     @Override
